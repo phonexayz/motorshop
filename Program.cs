@@ -27,8 +27,16 @@ builder.Services.AddHttpContextAccessor();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 // Support DATABASE_URL from Railway/Render if present
-// Using builder.Configuration is more reliable as it merges Environment Variables
-var databaseUrl = builder.Configuration["DATABASE_URL"]; 
+// Case-insensitive search for the environment variable for maximum reliability
+string? databaseUrl = null;
+foreach (System.Collections.DictionaryEntry ev in Environment.GetEnvironmentVariables())
+{
+    if (ev.Key.ToString()?.ToUpperInvariant() == "DATABASE_URL")
+    {
+        databaseUrl = ev.Value?.ToString();
+        break;
+    }
+}
 
 if (!string.IsNullOrEmpty(databaseUrl))
 {
