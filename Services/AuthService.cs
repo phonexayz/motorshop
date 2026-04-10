@@ -108,8 +108,19 @@ namespace MotorcycleRepairShop.Services
 
         private bool VerifyPassword(string password, string hashedPassword)
         {
+            // 1. Try new salted Base64 format (Current standard)
             var computedHash = HashPassword(password);
-            return computedHash == hashedPassword;
+            if (computedHash == hashedPassword) return true;
+
+            // 2. Try old hex format (For users migrated from local DB or created with old UserController logic)
+            using (var sha256 = SHA256.Create())
+            {
+                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                var hexHash = BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
+                if (hexHash == hashedPassword) return true;
+            }
+
+            return false;
         }
     }
 }
