@@ -27,9 +27,12 @@ builder.Services.AddHttpContextAccessor();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 // Support DATABASE_URL from Railway/Render if present
-var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+// Using builder.Configuration is more reliable as it merges Environment Variables
+var databaseUrl = builder.Configuration["DATABASE_URL"]; 
+
 if (!string.IsNullOrEmpty(databaseUrl))
 {
+    Console.WriteLine("[Cloud] DATABASE_URL detected.");
     try 
     {
         // Replace postgresql:// with postgres:// for Uri class if needed
@@ -50,11 +53,11 @@ if (!string.IsNullOrEmpty(databaseUrl))
     catch (Exception ex)
     {
         Console.WriteLine($"[Cloud] Error parsing DATABASE_URL: {ex.Message}");
-        if (!databaseUrl.StartsWith("postgres"))
-        {
-            connectionString = databaseUrl;
-        }
     }
+}
+else 
+{
+    Console.WriteLine("[Cloud] WARNING: DATABASE_URL not detected. Falling back to appsettings.json.");
 }
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
