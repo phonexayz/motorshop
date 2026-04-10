@@ -1,0 +1,92 @@
+@model MotorcycleRepairShop.Models.RepairOrder
+@{
+    ViewData["Title"] = "ແກ້ໄຂໃບສັ່ງຊ້ອມ";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="bi bi-pencil-square"></i> ແກ້ໄຂຂໍ້ມູນໃບສັ່ງຊ້ອມ</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a asp-action="Index" class="btn btn-secondary me-2">
+            <i class="bi bi-arrow-left"></i> ກັບໜ้ารາຍການ
+        </a>
+        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-info text-white">
+            <i class="bi bi-eye"></i> ເບິ່ງລາຍລະອຽດ/ເພີ່ມອະໄຫຼ່
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-warning text-dark fw-bold">
+                ເລກທີໃບສັ່ງຊ້ອມ: @Model.OrderNumber
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="OrderNumber" />
+                    <input type="hidden" asp-for="CustomerId" />
+                    <input type="hidden" asp-for="CreatedAt" />
+                    <input type="hidden" asp-for="CompletionDate" />
+                    <input type="hidden" asp-for="TotalAmount" />
+                    <input type="hidden" asp-for="PartsCost" />
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">ລູກຄ້າ</label>
+                            <input type="text" class="form-control bg-light" value="@Model.Customer?.Name" readonly />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="MotorcycleLicensePlate" class="form-label fw-bold">ປ້າຍທະບຽນລົດ</label>
+                            <input asp-for="MotorcycleLicensePlate" class="form-control" required />
+                            <span asp-validation-for="MotorcycleLicensePlate" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ProblemDescription" class="form-label fw-bold">ອາການເສຍ / ບັນຫາ <span class="text-danger">*</span></label>
+                        <textarea asp-for="ProblemDescription" class="form-control" rows="3" required></textarea>
+                        <span asp-validation-for="ProblemDescription" class="text-danger"></span>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Status" class="form-label fw-bold text-primary">ອັບເດດສະຖານະການຊ້ອມ</label>
+                            <select asp-for="Status" class="form-select border-primary cursor-pointer">
+                                <option value="Pending">ລໍຊ້ອມ / ລໍດຳເນີນການ</option>
+                                <option value="InProgress">ກຳລັງຊ້ອມ</option>
+                                <option value="Completed">ຊ້ອມແລ້ວ (ລໍຮັບລົດ)</option>
+                                <option value="Cancelled">ຍົກເລີກ</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="LaborCost" class="form-label fw-bold">ຄ່າແຮງຊ່າງ (ກີບ)</label>
+                            <input asp-for="LaborCost" type="number" step="0.01" class="form-control" />
+                            <small class="text-muted">ໃສ່ສະເພາະຄ່າແຮງ ຄ່າອະໄຫຼ່ຈະລວມຈາກລາຍການເບີກ</small>
+                            <span asp-validation-for="LaborCost" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="MechanicNotes" class="form-label fw-bold">ໝາຍເຫດຂອງຊ່າງ</label>
+                        <textarea asp-for="MechanicNotes" class="form-control" rows="2" placeholder="ລາຍລະອຽດການຊ້ອມ ຫຼື ຄຳແນະນຳ..."></textarea>
+                        <span asp-validation-for="MechanicNotes" class="text-danger"></span>
+                    </div>
+
+                    <hr />
+                    <div class="d-flex justify-content-between">
+                        <p class="text-muted small">ອັບເດດລ່າສຸດ: @Model.UpdatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                        <button type="submit" class="btn btn-warning px-4 fw-bold">
+                            <i class="bi bi-save"></i> ບັນທຶກການປ່ຽນແປງ
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

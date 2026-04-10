@@ -1,0 +1,183 @@
+@model List<MotorcycleRepairShop.Models.AppSetting>
+@{
+    ViewData["Title"] = "ຕັ້ງຄ່າລະບົບ";
+    var groupedSettings = Model.GroupBy(s => s.Group).OrderBy(g => g.Key);
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold text-dark border-start border-primary border-5 ps-3">ຕັ້ງຄ່າລະບົບ (Global Settings)</h2>
+            <p class="text-muted">ຈັດການຂໍ້ມູນຮ້ານ ແລະ ການຄຳນວນຕ່າງໆຂອງລະບົບ</p>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+            <i class="bi bi-exclamation-circle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <form asp-action="Update" method="post" enctype="multipart/form-data">
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+                    <div class="card-body d-flex justify-content-between align-items-center p-3">
+                        <div>
+                            <h5 class="fw-bold mb-0 text-primary"><i class="bi bi-database-down me-2"></i>ຈັດການສຳຮອງຂໍ້ມູນ</h5>
+                            <small class="text-muted">ດາວໂຫລດຂໍ້ມູນອາໄຫຼ່ທັງໝົດເປັນໄຟລ໌ CSV</small>
+                        </div>
+                        <a asp-action="ExportData" class="btn btn-outline-primary fw-bold">
+                            <i class="bi bi-download me-1"></i> ສົ່ງອອກຂໍ້ມູນ (Export)
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            @foreach (var group in groupedSettings)
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100 overflow-hidden" style="border-radius: 15px;">
+                        <div class="card-header bg-primary text-white py-3">
+                            <h5 class="card-title mb-0 fw-bold">
+                                @if (group.Key == "Shop Info")
+                                {
+                                    <i class="bi bi-shop me-2"></i> <span>ຂໍ້ມູນຮ້ານ</span>
+                                }
+                                else if (group.Key == "Financial")
+                                {
+                                    <i class="bi bi-cash-coin me-2"></i> <span>ການເງິນ & ພາສີ</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-gear-fill me-2"></i> @group.Key
+                                }
+                            </h5>
+                        </div>
+                        <div class="card-body p-4">
+                            @foreach (var setting in group.OrderBy(s => s.Key))
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold text-dark">
+                                        @switch (setting.Key)
+                                        {
+                                            case "ShopName": <span>ຊື່ຮ້ານ</span> break;
+                                            case "ShopAddress": <span>ທີ່ຢູ່ຮ້ານ</span> break;
+                                            case "ShopPhone": <span>ເບີໂທລະສັບຮ້ານ</span> break;
+                                            case "TaxRatePercentage": <span>ອັດຕາພາສີ (%)</span> break;
+                                            case "ReceiptFooter": <span>ຂໍ້ຄວາມທ້າຍບິນ</span> break;
+                                            case "ShopLogo": <span>ໂລໂກ້ຮ້ານ</span> break;
+                                            default: @setting.Key break;
+                                        }
+                                    </label>
+                                    
+                                    @if (setting.Key == "ShopLogo")
+                                    {
+                                        <div class="d-flex align-items-center gap-3">
+                                            @if (!string.IsNullOrEmpty(setting.Value))
+                                            {
+                                                <img src="@setting.Value" class="img-thumbnail" style="height: 60px;" alt="Logo" />
+                                            }
+                                            <input type="file" name="ShopLogoFile" class="form-control border-2" accept="image/*" />
+                                        </div>
+                                        <input type="hidden" name="settings[@setting.Key]" value="@setting.Value" />
+                                    }
+                                    else if (setting.Key == "ShopAddress" || setting.Key == "ReceiptFooter")
+                                    {
+                                        <textarea name="settings[@setting.Key]" class="form-control border-2" rows="2">@setting.Value</textarea>
+                                    }
+                                    else if (setting.Key.Contains("Rate") || setting.Key.Contains("Percentage"))
+                                    {
+                                        <div class="input-group">
+                                            <input type="number" step="0.01" name="settings[@setting.Key]" class="form-control border-2" value="@setting.Value" />
+                                            <span class="input-group-text bg-light">%</span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <input type="text" name="settings[@setting.Key]" class="form-control border-2" value="@setting.Value" />
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="row mt-2">
+            <div class="col-12 text-end">
+                <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm fw-bold">
+                    <i class="bi bi-save me-2"></i> ບັນທຶກການປ່ຽນແປງ
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Danger Zone -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-danger shadow-sm mb-4" style="border-radius: 15px; border-width: 2px; background-color: #fff5f5;">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div>
+                            <h5 class="fw-bold text-danger mb-1"><i class="bi bi-exclamation-triangle-fill me-2"></i>ພື້ນທີ່ອັນຕະລາຍ (Danger Zone)</h5>
+                            <p class="text-muted mb-0">ລ້າງຂໍ້ມູນທົດສອບທັງໝົດເພື່ອເລີ່ມຕົ້ນໃຊ້ງານຈິງ. **ຂໍ້ມູນຈະຖືກລຶບຖາວອນ!**</p>
+                        </div>
+                        <button type="button" class="btn btn-danger btn-lg px-4 fw-bold shadow-sm" onclick="confirmReset()">
+                            <i class="bi bi-trash3-fill me-2"></i> Reset ລະບົບທັງໝົດ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form id="resetForm" asp-action="ResetSystem" method="post" style="display:none;">
+        @Html.AntiForgeryToken()
+    </form>
+</div>
+
+<script>
+    function confirmReset() {
+        Swal.fire({
+            title: 'ຢືນຢັນການ Reset ລະບົບ?',
+            text: "ຂໍ້ມູນທຸລະກຳ, ລູກຄ້າ, ອາໄຫຼ່ ແລະ ປະຫວັດທັງໝົດຈະຖືກລຶບຖາວອນ! (ຍົກເວັ້ນບັນຊີຂອງທ່ານ ແລະ ການຕັ້ງຄ່າຮ້ານ)",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'ຢືນຢັນລຶບຂໍ້ມູນທັງໝົດ',
+            cancelButtonText: 'ຍົກເລີກ',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('resetForm').submit();
+            }
+        })
+    }
+</script>
+
+<style>
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+    }
+    .card {
+        transition: transform 0.2s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+</style>

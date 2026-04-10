@@ -1,0 +1,180 @@
+@model IEnumerable<MotorcycleRepairShop.Models.InventoryLog>
+
+@{
+    ViewData["Title"] = "ປະຫວັດການເຄື່ອນໄຫວອາໄຫຼ່";
+    var part = ViewBag.Part as MotorcycleRepairShop.Models.Part;
+}
+
+<div class="container-fluid animate__animated animate__fadeIn">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="fas fa-history text-primary me-2"></i>
+                @(part != null ? $"ປະຫວັດຂອງ: {part.Name}" : "ປະຫວັດການເຄື່ອນໄຫວອາໄຫຼ່ທັງໝົດ")
+            </h1>
+            <p class="text-muted">ຕິດຕາມທຸກການປ່ຽນແປງຂອງຈຳນວນອາໄຫຼ່ໃນລະບົບ</p>
+        </div>
+        <div>
+            @if (part != null)
+            {
+                <a asp-action="Details" asp-route-id="@part.Id" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> ກັບຄືນ
+                </a>
+            }
+            <a asp-action="Index" class="btn btn-primary ms-2">
+                <i class="fas fa-boxes me-1"></i> ລາຍການອາໄຫຼ່
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 overflow-hidden">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light text-dark">
+                        <tr>
+                            <th class="ps-4">ວັນທີ/ເວລາ</th>
+                            @if (part == null)
+                            {
+                                <th>ອາໄຫຼ່</th>
+                            }
+                            <th>ປະເພດ</th>
+                            <th>ແຫຼ່ງທີ່ມາ</th>
+                            <th>ການປ່ຽນແປງ</th>
+                            <th>ຄົງເຫຼືອ</th>
+                            <th>ໝາຍເຫດ</th>
+                            <th>ຜູ້ດຳເນີນການ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="@(part == null ? 8 : 7)" class="text-center py-5">
+                                    <div class="text-muted">
+                                        <i class="fas fa-info-circle fa-2x mb-2"></i>
+                                        <p>ບໍ່ພົບຂໍ້ມູນການເຄື່ອນໄຫວ</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        @foreach (var log in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold">@log.CreatedAt.ToString("dd/MM/yyyy")</div>
+                                    <small class="text-muted">@log.CreatedAt.ToString("HH:mm")</small>
+                                </td>
+                                @if (part == null)
+                                {
+                                    <td>
+                                        <div class="fw-bold text-primary">@log.Part?.Name</div>
+                                        <small class="text-muted">@log.Part?.PartNumber</small>
+                                    </td>
+                                }
+                                <td>
+                                    @switch (log.LogType)
+                                    {
+                                        case "Restock":
+                                            <span class="badge bg-success-soft text-success px-3 py-2">ຮັບແຂົ້າ</span>
+                                            break;
+                                        case "Sale":
+                                            <span class="badge bg-info-soft text-info px-3 py-2">ຂາຍ</span>
+                                            break;
+                                        case "Usage":
+                                            <span class="badge bg-warning-soft text-warning px-3 py-2">ນຳໃຊ້</span>
+                                            break;
+                                        case "Adjustment":
+                                            <span class="badge bg-secondary-soft text-secondary px-3 py-2">ປັບປຸງ</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-light text-dark px-3 py-2">@log.LogType</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        @if (log.Source == "RepairOrder")
+                                        {
+                                            <i class="fas fa-tools text-muted me-2"></i>
+                                            <span>ໃບສັ່ງສ້ອມ</span>
+                                            @if (!string.IsNullOrEmpty(log.SourceId))
+                                            {
+                                                <a href="/RepairOrder/Details/@log.SourceId" class="ms-1 badge bg-light text-primary border">#@log.SourceId</a>
+                                            }
+                                        }
+                                        else if (log.Source == "POS")
+                                        {
+                                            <i class="fas fa-cash-register text-muted me-2"></i>
+                                            <span>POS</span>
+                                            @if (!string.IsNullOrEmpty(log.SourceId))
+                                            {
+                                                <span class="ms-1 badge bg-light text-info border">#@log.SourceId</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-user-edit text-muted me-2"></i>
+                                            <span>ຈັດການດ້ວຍມື</span>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (log.QuantityChanged > 0)
+                                    {
+                                        <span class="text-success fw-bold">
+                                            <i class="fas fa-plus-circle me-1"></i> @Math.Abs(log.QuantityChanged)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-danger fw-bold">
+                                            <i class="fas fa-minus-circle me-1"></i> @Math.Abs(log.QuantityChanged)
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-bold fs-5">@log.NewQuantity</span>
+                                        <small class="text-muted" style="font-size: 0.75rem;">(ກ່ອນໜ້າ: @log.PreviousQuantity)</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-muted d-inline-block text-truncate" style="max-width: 150px;" title="@log.Note">
+                                        @log.Note
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-primary-soft text-primary rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                                            <i class="fas fa-user-circle"></i>
+                                        </div>
+                                        <span>@(string.IsNullOrEmpty(log.CreatedBy) ? "System" : log.CreatedBy)</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Premium Soft Badges */
+    .bg-success-soft { background-color: rgba(40, 167, 69, 0.1); }
+    .bg-info-soft { background-color: rgba(23, 162, 184, 0.1); }
+    .bg-warning-soft { background-color: rgba(255, 193, 7, 0.1); }
+    .bg-secondary-soft { background-color: rgba(108, 117, 125, 0.1); }
+    .bg-primary-soft { background-color: rgba(13, 110, 253, 0.1); }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0,0,0,0.01);
+    }
+    
+    .card {
+        border-radius: 12px;
+        transition: transform 0.2s;
+    }
+</style>

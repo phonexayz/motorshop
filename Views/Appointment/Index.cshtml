@@ -1,0 +1,99 @@
+@model IEnumerable<MotorcycleRepairShop.Models.Appointment>
+@{
+    ViewData["Title"] = "ຕາຕະລາງນັດໝາຍລູກຄ້າ";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="bi bi-calendar-event text-primary"></i> ຕາຕະລາງນັດໝາຍລູກຄ້າ</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a asp-action="Create" class="btn btn-primary shadow-sm">
+            <i class="bi bi-plus-circle"></i> ນັດຄິວຄັນໃໝ່
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">ວັນແລະເວລາ ນັດໝາຍ</th>
+                        <th>ລູກຄ້າ / ລົດຈັກ</th>
+                        <th>ອາການເບື້ອງຕົ້ນ</th>
+                        <th>ສະຖານະການນັດ</th>
+                        <th class="text-end pe-4">ຈັດການ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            var rowClass = item.AppointmentDate.Date == DateTime.Today.Date && item.Status == "Scheduled" ? "table-warning" : "";
+                            
+                            <tr class="@rowClass">
+                                <td class="ps-4 fw-bold">
+                                    @item.AppointmentDate.ToString("dd/MM/yyyy") 
+                                    <span class="text-primary d-block small">⏰ @item.AppointmentDate.ToString("HH:mm") ໂມງ</span>
+                                </td>
+                                <td>
+                                    <strong>@(item.Customer?.Name ?? "-")</strong>
+                                    <div class="text-muted small">ທະບຽນ: <span class="badge bg-secondary">@(item.Customer?.LicensePlate ?? "-")</span></div>
+                                </td>
+                                <td class="text-truncate" style="max-width: 200px;">@(string.IsNullOrEmpty(item.Reason) ? "-" : item.Reason)</td>
+                                <td>
+                                    <select class="form-select form-select-sm status-dropdown" data-id="@item.Id" style="width: auto;">
+                                        <option value="Scheduled" selected="@(item.Status == "Scheduled" ? "selected" : null)">ລໍຖ້າຮັບລົດ</option>
+                                        <option value="Completed" selected="@(item.Status == "Completed" ? "selected" : null)">ເຂົ້າຮັບບໍລິການແລ້ວ</option>
+                                        <option value="Cancelled" selected="@(item.Status == "Cancelled" ? "selected" : null)">ຍົກເລີກ/ບໍ່ມານັດ</option>
+                                    </select>
+                                </td>
+                                <td class="text-end pe-4">
+                                    @if (item.Status == "Scheduled")
+                                    {
+                                        <a asp-action="OpenOrder" asp-route-id="@item.Id" class="btn btn-sm btn-success me-1" title="ຮັບລົດ / ສ້າງໃບສັ່ງຊ້ອມ">
+                                            <i class="bi bi-tools"></i> ຮັບລົດ
+                                        </a>
+                                    }
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning" title="ແກ້ໄຂ">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="bi bi-calendar-x fa-3x mb-3 d-block" style="font-size: 2.5rem;"></i>
+                                ຍັງບໍ່ມີຄິວນັດໝາຍໃນຊ່ວງນີ້
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('.status-dropdown').change(function() {
+                var id = $(this).data('id');
+                var status = $(this).val();
+                
+                $.post('/Appointment/UpdateStatus', { id: id, status: status }, function(res) {
+                    if(res.success) {
+                        // refresh page to update colors
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                });
+            });
+        });
+    </script>
+}

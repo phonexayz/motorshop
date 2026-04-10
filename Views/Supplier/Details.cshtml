@@ -1,0 +1,118 @@
+@model MotorcycleRepairShop.Models.Supplier
+@{
+    ViewData["Title"] = "ລາຍລະອຽດຜູ້ສະໜອງ";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">ລາຍລະອຽດຜູ້ສະໜອງ: @Model.Name</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2 shadow-sm">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                <i class="fas fa-edit"></i> ແກ້ໄຂ
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> ກັບຄືນ
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-5">
+        <div class="card shadow-sm border-0 mb-4 h-100">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> ຂໍ້ມູນຕິດຕໍ່</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <th width="40%">ຊື່ຜູ້ສະໜອງ:</th>
+                        <td class="fw-bold">@Model.Name</td>
+                    </tr>
+                    <tr>
+                        <th>ຜູ້ຕິດຕໍ່:</th>
+                        <td>@(Model.ContactPerson ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <th>ເບີໂທລະສັບ:</th>
+                        <td>
+                            @if(!string.IsNullOrEmpty(Model.Phone)) {
+                                <a href="tel:@Model.Phone" class="text-decoration-none">@Model.Phone</a>
+                            } else {
+                                <span>-</span>
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>ອີເມວ:</th>
+                        <td>@(Model.Email ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <th>ທີ່ຢູ່:</th>
+                        <td>@(Model.Address ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <th>ໝາຍເຫດ:</th>
+                        <td>@(Model.Note ?? "-")</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card-footer text-muted small">
+                ເພີ່ມໃນລະບົບເມື່ອ: @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="card shadow-sm border-0 mb-4 h-100">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-boxes"></i> ອາໄຫຼ່ທີ່ສະໜອງໃຫ້ (@Model.Parts.Count() ລາຍການ)</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.Parts != null && Model.Parts.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ຊື່ອາໄຫຼ່</th>
+                                    <th class="text-end">ລາຄາຂາຍ</th>
+                                    <th class="text-end">ສະຕັອກ</th>
+                                    <th class="text-center">ຈັດການ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var part in Model.Parts)
+                                {
+                                    <tr>
+                                        <td>
+                                            @part.Name<br />
+                                            <small class="text-muted">@part.PartNumber</small>
+                                        </td>
+                                        <td class="text-end fw-bold text-primary">@part.Price.ToString("N0") ₭</td>
+                                        <td class="text-end">
+                                            <span class="badge @(part.StockQuantity <= part.MinStockLevel ? "bg-danger" : "bg-success")">
+                                                @part.StockQuantity @part.Unit
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <a asp-controller="Inventory" asp-action="Details" asp-route-id="@part.Id" class="btn btn-sm btn-outline-info">
+                                                <i class="fas fa-search small"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <p class="text-muted mb-0">ຍັງບໍ່ມີອາໄຫຼ່ທີ່ເຊື່ອມຕໍ່ກັບຜູ້ສະໜອງນີ້</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

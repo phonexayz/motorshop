@@ -1,0 +1,64 @@
+@model MotorcycleRepairShop.Models.User
+@{
+    ViewData["Title"] = "ແກ້ໄຂຜູ້ໃຊ້ລະບົບ";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="bi bi-person-gear"></i> ແກ້ໄຂຜູ້ໃຊ້ລະບົບ</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> ກັບຄືນໜ້າລາຍຊື່
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card shadow-sm border-warning">
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="Id" />
+                    
+                    <div class="mb-3">
+                        <label asp-for="Username" class="form-label fw-bold">ຊື່ຜູ້ໃຊ້<span class="text-danger">*</span></label>
+                        <input asp-for="Username" class="form-control bg-light" readonly />
+                        <small class="text-danger">ບໍ່ສາມາດປ່ຽນຊື່ຜູ້ໃຊ້ຂອງບັນຊີເດີມໄດ້</small>
+                        <span asp-validation-for="Username" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Role" class="form-label fw-bold">ລະດັບສິດທິການໃຊ້ງານ <span class="text-danger">*</span></label>
+                        <select asp-for="Role" class="form-select">
+                            <option value="Mechanic">ຊ່າງສ້ອມ</option>
+                            <option value="Staff">ພະນັກງານ</option>
+                            <option value="Manager">ຜູ້ຈັດການ</option>
+                            <option value="Director">ຜູ້ອຳນວຍການ</option>
+                            <option value="Owner">ເຈົ້າຂອງຮ້ານ</option>
+                            <option value="Admin">ຜູ້ດູແລລະບົບ</option>
+                        </select>
+                        <span asp-validation-for="Role" class="text-danger"></span>
+                    </div>
+
+                    <hr />
+                    
+                    <div class="mb-3 border rounded p-3 bg-light">
+                        <label class="form-label fw-bold text-danger"><i class="bi bi-shield-lock"></i> ຕັ້ງລະຫັດຜ່ານໃໝ່</label>
+                        <input type="password" name="NewPassword" class="form-control" placeholder="ກະລຸນາໃສ່ລະຫັດຜ່ານໃໝ່ທີ່ນີ້ (ຖ້າຕ້ອງການປ່ຽນ)" />
+                        <small class="text-muted">ຖ້າບໍ່ໃສ່ລະບົບຈະໃຊ້ລະຫັດຜ່ານເດີມ</small>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-warning fw-bold">
+                            <i class="bi bi-save"></i> ບັນທຶກການປ່ຽນແປງ
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

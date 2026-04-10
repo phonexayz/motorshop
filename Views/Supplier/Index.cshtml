@@ -1,0 +1,108 @@
+@model IEnumerable<MotorcycleRepairShop.Models.Supplier>
+@{
+    ViewData["Title"] = "ລາຍຊື່ຜູ້ສະໜອງ";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-truck-loading"></i> ຈັດການຜູ້ສະໜອງ (ຮ້ານຂາຍສົ່ງ)</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a asp-action="Create" class="btn btn-primary shadow-sm">
+            <i class="fas fa-plus-circle"></i> ເພີ່ມຜູ້ສະໜອງໃໝ່
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 bg-light mb-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 bg-white shadow-sm rounded">
+                <thead class="bg-dark text-white">
+                    <tr>
+                        <th class="ps-3">ຊື່ຮ້ານ / ຜູ້ສະໜອງ</th>
+                        <th>ຜູ້ຕິດຕໍ່</th>
+                        <th>ເບີໂທ</th>
+                        <th>ອີເມວ</th>
+                        <th class="text-center">ຈັດການ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="fas fa-info-circle fa-2x mb-3"></i>
+                                    <p>ຍັງບໍ່ມີຂໍ້ມູນຜູ້ສະໜອງໃນລະບົບ</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-3 fw-bold text-primary">@item.Name</td>
+                            <td>@(item.ContactPerson ?? "-")</td>
+                            <td>
+                                @if(!string.IsNullOrEmpty(item.Phone)) {
+                                    <a href="tel:@item.Phone" class="text-decoration-none"><i class="fas fa-phone-alt small"></i> @item.Phone</a>
+                                } else {
+                                    <span>-</span>
+                                }
+                            </td>
+                            <td>@(item.Email ?? "-")</td>
+                            <td class="text-center">
+                                <div class="btn-group shadow-sm">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info" title="ລາຍລະອຽດ">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning" title="ແກ້ໄຂ">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" title="ລຶບ" 
+                                            onclick="confirmDelete(@item.Id, '@item.Name')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-exclamation-triangle"></i> ຢືນຢັນການລຶບ</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການລຶບຜູ້ສະໜອງ <strong id="deleteTargetName"></strong>?
+                <p class="text-danger small mt-2 mb-0"><i class="fas fa-info-circle"></i> ໝາຍເຫດ: ອາໄຫຼ່ທີ່ເຊື່ອມຕໍ່ກັບຜູ້ສະໜອງນີ້ຈະບໍ່ຖືກລຶບ ແຕ່ຈະຖືກຍົກເລີກການເຊື່ອມຕໍ່.</p>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ຍົກເລີກ</button>
+                <form id="deleteForm" method="post" asp-action="Delete">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="deleteId" />
+                    <button type="submit" class="btn btn-danger">ຢືນຢັນການລຶບ</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id, name) {
+            document.getElementById('deleteId').value = id;
+            document.getElementById('deleteTargetName').innerText = name;
+            var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+    </script>
+}

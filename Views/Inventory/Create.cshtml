@@ -1,0 +1,109 @@
+@model MotorcycleRepairShop.Models.Part
+@{
+    ViewData["Title"] = "ເພີ່ມອາໄຫຼ່ໃໝ່";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">ເພີ່ມອາໄຫຼ່ໃໝ່</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> ກັບຄືນໜ້າລายການ
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm col-md-8 mx-auto">
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="PartNumber" class="form-label fw-bold">ລະຫັດອາໄຫຼ່</label>
+                    <input asp-for="PartNumber" class="form-control" placeholder="ຕົວຢ່າງ: P-0001" />
+                    <span asp-validation-for="PartNumber" class="text-danger"></span>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Barcode" class="form-label fw-bold">ບາໂຄ້ດ</label>
+                    <input asp-for="Barcode" class="form-control" placeholder="ສະແກນ ຫຼື ພິມບາໂຄ້ດ" />
+                    <span asp-validation-for="Barcode" class="text-danger"></span>
+                </div>
+                
+                <div class="col-12 mb-3">
+                    <label asp-for="Name" class="form-label fw-bold">ຊື່ອາໄຫຼ່ <span class="text-danger">*</span></label>
+                    <input asp-for="Name" class="form-control" placeholder="ຊື່ ຫຼື ລາຍລະອຽດອາໄຫຼ່" required />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                
+                <div class="col-12 mb-3">
+                    <label asp-for="Description" class="form-label fw-bold">ລາຍລະອຽດເພີ່ມເຕີມ</label>
+                    <textarea asp-for="Description" class="form-control" rows="2"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Cost" class="form-label fw-bold">ລາຄາຕົ້ນທຶນ</label>
+                    <input asp-for="Cost" type="number" step="0.01" class="form-control" />
+                    <span asp-validation-for="Cost" class="text-danger"></span>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Price" class="form-label fw-bold">ລາຄາຂາຍ <span class="text-danger">*</span></label>
+                    <input asp-for="Price" type="number" step="0.01" class="form-control" required />
+                    <span asp-validation-for="Price" class="text-danger"></span>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <label asp-for="StockQuantity" class="form-label fw-bold">ຈຳນວນສະຕັອກ <span class="text-danger">*</span></label>
+                    <input asp-for="StockQuantity" type="number" class="form-control" value="0" required />
+                    <span asp-validation-for="StockQuantity" class="text-danger"></span>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <label asp-for="MinStockLevel" class="form-label fw-bold">ແຈ້ງເຕືອນເມື່ອຕ່ຳກວ່າ</label>
+                    <input asp-for="MinStockLevel" type="number" class="form-control" value="5" />
+                    <span asp-validation-for="MinStockLevel" class="text-danger"></span>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <label asp-for="Unit" class="form-label fw-bold">ຫົວໜ່ວຍນັບ</label>
+                    <input asp-for="Unit" class="form-control" value="ຊິ້ນ" />
+                    <span asp-validation-for="Unit" class="text-danger"></span>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">ລຸ້ນທີ່ຮອງຮັບ (ຂັ້ນດ້ວຍຈຸດ)</label>
+                    <!-- Using a simple input, you might need custom model binding for string[] or handle it in controller. For now, a custom name attribute might be needed if MVC doesn't auto-bind comma strings to arrays -->
+                    <input type="text" name="CompatibleModelsRaw" class="form-control" placeholder="ຕົວຢ່າງ: Honda Wave, Yamaha Fino" 
+                           @(Model?.CompatibleModels != null ? "value=" + string.Join(",", Model.CompatibleModels) : "") />
+                    <small class="text-muted">ປະວ່າງໄວ້ຖ້າໃຊ້ໄດ້ກັບທຸກລຸ້ນ</small>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label asp-for="SupplierId" class="form-label fw-bold">ຜູ້ສະໜອງ (Supplier)</label>
+                    <div class="input-group">
+                        <select asp-for="SupplierId" class="form-select" asp-items="@(new SelectList(ViewBag.Suppliers, "Id", "Name"))">
+                            <option value="">-- ເລືອກຜູ້ສະໜອງ --</option>
+                        </select>
+                        <a asp-controller="Supplier" asp-action="Create" class="btn btn-outline-secondary" title="ເພີ່ມຜູ້ສະໜອງໃໝ່">
+                            <i class="bi bi-plus-lg"></i>
+                        </a>
+                    </div>
+                    <span asp-validation-for="SupplierId" class="text-danger"></span>
+                </div>
+            </div>
+            
+            <hr />
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary px-4">
+                    <i class="bi bi-save"></i> ບັນທຶກຂໍ້ມູນ
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

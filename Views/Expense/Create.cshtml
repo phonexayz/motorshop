@@ -1,0 +1,72 @@
+@model MotorcycleRepairShop.Models.Expense
+
+@{
+    ViewData["Title"] = "ບັນທຶກລາຍຈ່າຍ";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm border-0 mt-5">
+            <div class="card-header bg-danger text-white py-3">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-plus-circle"></i> ບັນທຶກລາຍຈ່າຍໃໝ່</h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label fw-bold">ລາຍການລາຍຈ່າຍ</label>
+                        <input asp-for="Title" class="form-control form-control-lg" placeholder="ຊື່ລາຍການ (ເຊັ່ນ: ຄ່າເຊົ່າຮ້ານ)" required />
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label asp-for="Category" class="form-label fw-bold">ໝວດໝູ່</label>
+                            <select asp-for="Category" class="form-select">
+                                <option value="Utilities">ຄ່ານ້ຳ-ໄຟ (Utilities)</option>
+                                <option value="Rent">ຄ່າເຊົ່າຮ້ານ (Rent)</option>
+                                <option value="Salaries">ເງິນເດືອນ (Salaries)</option>
+                                <option value="Tools">ອຸປະກອນ/ເຄື່ອງມື (Tools)</option>
+                                <option value="Phone">ຄ່າໂທ/ອິນເຕີເນັດ (Phone)</option>
+                                <option value="Other">ອື່ນໆ (Other)</option>
+                            </select>
+                            <span asp-validation-for="Category" class="text-danger small"></span>
+                        </div>
+                        <div class="col-6">
+                            <label asp-for="Date" class="form-label fw-bold">ວັນທີລາຍຈ່າຍ</label>
+                            <input asp-for="Date" type="datetime-local" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                            <span asp-validation-for="Date" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Amount" class="form-label fw-bold">ຈຳນວນເງິນ (ກີບ)</label>
+                        <div class="input-group input-group-lg">
+                            <input asp-for="Amount" type="number" class="form-control fw-bold text-danger text-end" placeholder="0" required />
+                            <span class="input-group-text bg-light">₭</span>
+                        </div>
+                        <span asp-validation-for="Amount" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Notes" class="form-label fw-bold">ໝາຍເຫດ/ລາຍລະອຽດ</label>
+                        <textarea asp-for="Notes" class="form-control" rows="3" placeholder="..."></textarea>
+                        <span asp-validation-for="Notes" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger btn-lg fw-bold">
+                            <i class="bi bi-save"></i> ບັນທຶກລາຍຈ່າຍ
+                        </button>
+                        <a asp-action="Index" class="btn btn-light">ຍົກເລີກ</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

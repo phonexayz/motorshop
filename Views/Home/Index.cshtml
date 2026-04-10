@@ -1,0 +1,388 @@
+@model MotorcycleRepairShop.Controllers.DashboardViewModel
+@{
+    ViewData["Title"] = "ແດຊບອດ";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">ແດຊບອດ</h1>
+</div>
+
+<!-- Stats Cards -->
+<style>
+    .stat-card-solid {
+        border-radius: 12px;
+        color: white;
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        transition: transform 0.3s;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .stat-card-solid:hover {
+        transform: translateY(-5px);
+    }
+    .stat-card-solid .inner {
+        position: relative;
+        z-index: 2;
+    }
+    .stat-card-solid .inner h3 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    .stat-card-solid .inner p {
+        font-size: 1.1rem;
+        margin-bottom: 0;
+        opacity: 0.9;
+    }
+    .stat-card-solid .icon-large {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 4rem;
+        color: rgba(255,255,255,0.3);
+        z-index: 1;
+    }
+    
+    .bg-gradient-primary { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); }
+    .bg-solid-purple { background: #8b5cf6; }
+    .bg-solid-blue { background: #3b82f6; }
+    .bg-solid-green { background: #10b981; }
+    .bg-solid-orange { background: #f59e0b; }
+    .bg-solid-red { background: #ef4444; }
+
+    .chart-wrapper {
+        position: relative;
+        height: 350px;
+        width: 100%;
+    }
+</style>
+
+<div class="row g-4 mb-4">
+    <!-- Card 1 -->
+    <div class="col-xl-4 col-md-6">
+        <div class="stat-card-solid bg-gradient-primary">
+            <div class="inner">
+                <p>ອາໄຫຼ່ທັງໝົດ</p>
+                <h3>@Model.TotalPartsCount</h3>
+            </div>
+            <div class="icon-large">
+                <i class="bi bi-box-seam"></i>
+            </div>
+        </div>
+    </div>
+    <!-- Card 2 -->
+    <div class="col-xl-4 col-md-6">
+        <div class="stat-card-solid bg-solid-green">
+            <div class="inner">
+                <p>ໃບສັ່ງສ້ອມທັງໝົດ</p>
+                <h3>@Model.TotalOrdersCount</h3>
+            </div>
+            <div class="icon-large">
+                <i class="bi bi-file-earmark-text"></i>
+            </div>
+        </div>
+    </div>
+    <!-- Card 3 -->
+    <div class="col-xl-4 col-md-6">
+        <div class="stat-card-solid bg-solid-blue">
+            <div class="inner">
+                <p>ຄິວລູກຄ້ານັດມື້ນີ້</p>
+                <h3>@Model.TodayAppointments.Count</h3>
+            </div>
+            <div class="icon-large">
+                <i class="bi bi-calendar-check"></i>
+            </div>
+        </div>
+    </div>
+    <!-- Card 4 -->
+    <div class="col-xl-4 col-md-6">
+        <div class="stat-card-solid bg-solid-orange">
+            <div class="inner">
+                <p>ກຳລັງດຳເນີນການ</p>
+                <h3>@Model.InProgressRepairOrders.Count</h3>
+            </div>
+            <div class="icon-large">
+                <i class="bi bi-tools"></i>
+            </div>
+        </div>
+    </div>
+    <!-- Card 5 -->
+    <div class="col-xl-4 col-md-6">
+        <div class="stat-card-solid bg-solid-purple">
+            <div class="inner">
+                <p>ລໍຖ້າດຳເນີນການ</p>
+                <h3>@Model.TodayRepairOrders.Count</h3>
+            </div>
+            <div class="icon-large">
+                <i class="bi bi-hourglass-split"></i>
+            </div>
+        </div>
+    </div>
+    <!-- Card 6 -->
+    <div class="col-xl-4 col-md-6">
+        <div class="stat-card-solid bg-solid-red">
+            <div class="inner">
+                <p>ອາໄຫຼ່ສະຕ໋ອກຕ່ຳ</p>
+                <h3>@Model.LowStockParts.Count</h3>
+            </div>
+            <div class="icon-large">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card main-card mb-4">
+    <div class="card-body">
+        <form class="row d-flex flex-wrap align-items-center mb-4 g-3">
+            <div class="col-auto">
+                <label for="startDate" class="col-form-label text-muted fw-bold">ວັນທີເລີ່ມຕົ້ນ</label>
+            </div>
+            <div class="col-auto">
+                <input type="date" id="startDate" class="form-control" value="@DateTime.Today.AddMonths(-3).ToString("yyyy-MM-dd")">
+            </div>
+            <div class="col-auto">
+                <label for="endDate" class="col-form-label text-muted fw-bold">ວັນທີສິ້ນສຸດ</label>
+            </div>
+            <div class="col-auto">
+                <input type="date" id="endDate" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")">
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-primary d-flex align-items-center px-4" style="background: var(--primary-gradient); border: none; border-radius: 8px;">
+                    <i class="bi bi-search me-2"></i> ຄົ້ນຫາ
+                </button>
+            </div>
+        </form>
+
+        <div class="chart-wrapper">
+            <canvas id="dashboardChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Low Stock Alert -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-warning">
+                    <i class="bi bi-exclamation-triangle"></i> ແຈ້ງເຕືອນສະຕ໋ອກຕ່ຳ
+                </h6>
+            </div>
+            <div class="card-body">
+                @if (Model.LowStockParts.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>ຊື່ອາໄຫຼ່</th>
+                                    <th>ສະຕ໋ອກຄົງເຫຼືອ</th>
+                                    <th>ລາຄາ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var part in Model.LowStockParts)
+                                {
+                                    <tr class="low-stock">
+                                        <td>@part.Name</td>
+                                        <td><span class="badge bg-warning">@part.StockQuantity</span></td>
+                                        <td>@part.Price.ToString("N0") ₭</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a asp-controller="Inventory" asp-action="LowStock" class="btn btn-warning btn-sm">
+                            ເບິ່ງທັງໝົດ
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">ບໍ່ມີອາໄຫຼ່ທີ່ສະຕ໋ອກຕ່ຳ</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Today's Appointments -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="bi bi-calendar-check"></i> ຄິວລູກຄ້າທີ່ນັດໝາຍມື້ນີ້
+                </h6>
+            </div>
+            <div class="card-body">
+                @if (Model.TodayAppointments.Any())
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var appt in Model.TodayAppointments)
+                        {
+                            <div class="list-group-item px-0">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1 fw-bold">@(appt.Customer?.Name ?? "-")</h6>
+                                    <small class="text-primary fw-bold">@appt.AppointmentDate.ToString("HH:mm") ໂມງ</small>
+                                </div>
+                                <p class="mb-1 small text-muted">@appt.Reason</p>
+                                <small>ສະຖານະ: 
+                                    <span class="badge bg-@(appt.Status == "Scheduled" ? "warning" : appt.Status == "Completed" ? "success" : "danger")">
+                                        @(appt.Status == "Scheduled" ? "ລໍຖ້າຮັບບໍລິການ" : appt.Status == "Completed" ? "ສຳເລັດແລ້ວ" : "ຍົກເລີກ")
+                                    </span>
+                                </small>
+                            </div>
+                        }
+                    </div>
+                    <div class="text-center mt-3">
+                        <a asp-controller="Appointment" asp-action="Index" class="btn btn-outline-primary btn-sm">
+                            ເບິ່ງຕາຕະລາງນັດທັງໝົດ
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4">
+                        <i class="bi bi-calendar2-x text-muted mb-2" style="font-size: 2rem;"></i>
+                        <p class="text-muted mb-0">ບໍ່ມີຄິວລູກຄ້າຈອງເຂົ້າມາໃນມື້ນີ້</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Activity Feed -->
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card shadow border-0">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center" 
+                 style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);">
+                <h6 class="m-0 fw-bold text-white">
+                    <i class="bi bi-activity me-2"></i> ລາຍການເຄື່ອນໄຫວຫຼ້າສຸດ (Activity Feed)
+                </h6>
+                <span class="badge bg-light text-dark">@Model.RecentActivities.Count ລາຍການ</span>
+            </div>
+            <div class="card-body p-0" style="max-height: 420px; overflow-y: auto;">
+                @if (Model.RecentActivities.Any())
+                {
+                    <div class="activity-timeline p-3">
+                        @foreach (var activity in Model.RecentActivities)
+                        {
+                            <div class="activity-item d-flex align-items-start gap-3 mb-3 pb-3 border-bottom">
+                                <div class="activity-icon flex-shrink-0 rounded-circle d-flex align-items-center justify-content-center text-@activity.IconColor bg-@activity.IconColor bg-opacity-10"
+                                     style="width:40px; height:40px; border: 2px solid currentColor;">
+                                    <i class="bi @activity.Icon fs-6 text-@activity.IconColor"></i>
+                                </div>
+                                <div class="flex-grow-1 min-width-0">
+                                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-1">
+                                        @if (!string.IsNullOrEmpty(activity.LinkUrl))
+                                        {
+                                            <a href="@activity.LinkUrl" class="fw-bold text-dark text-decoration-none activity-title">
+                                                @activity.Title
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="fw-bold activity-title">@activity.Title</span>
+                                        }
+                                        <span class="text-muted small text-nowrap">
+                                            <i class="bi bi-clock me-1"></i>
+                                            @{
+                                                var diff = DateTime.Now - activity.Timestamp;
+                                                string timeAgo;
+                                                if (diff.TotalMinutes < 1) timeAgo = "ບໍ່ດົນນີ້";
+                                                else if (diff.TotalMinutes < 60) timeAgo = $"{(int)diff.TotalMinutes} ນາທີກ່ອນ";
+                                                else if (diff.TotalHours < 24) timeAgo = $"{(int)diff.TotalHours} ຊົ່ວໂມງກ່ອນ";
+                                                else timeAgo = activity.Timestamp.ToString("dd/MM/yy HH:mm");
+                                            }
+                                            @timeAgo
+                                        </span>
+                                    </div>
+                                    <p class="text-muted small mb-0 mt-1">@activity.Description</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-3 opacity-25"></i>
+                        <p>ຍັງບໍ່ມີລາຍການເຄື່ອນໄຫວ</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .activity-title:hover { color: #6366f1 !important; }
+    .activity-item:last-child { border-bottom: none !important; margin-bottom: 0 !important; padding-bottom: 0 !important; }
+    .activity-timeline::-webkit-scrollbar { width: 4px; }
+    .activity-timeline::-webkit-scrollbar-track { background: #f1f1f1; }
+    .activity-timeline::-webkit-scrollbar-thumb { background: #c4b5fd; border-radius: 4px; }
+</style>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const chartCanvas = document.getElementById('dashboardChart');
+            if (chartCanvas) {
+                const ctx = chartCanvas.getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: @Html.Raw(Json.Serialize(Model.ChartLabels)),
+                        datasets: [
+                            {
+                                label: 'ລາຍຮັບ (Revenue)',
+                                data: @Html.Raw(Json.Serialize(Model.RevenueData)),
+                                borderColor: '#8b5cf6',
+                                backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.4
+                            },
+                            {
+                                label: 'ລາຍຈ່າຍອາໄຫຼ່ (Parts Cost)',
+                                data: @Html.Raw(Json.Serialize(Model.CostData)),
+                                borderColor: '#f59e0b',
+                                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    font: { family: "'Prompt', sans-serif" }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+}

@@ -1,0 +1,142 @@
+@model MotorcycleRepairShop.Models.Customer
+@{
+    ViewData["Title"] = "ປະຫວັດລູກຄ้າລາຍບຸກຄົນ";
+    var repairHistory = ViewBag.RepairHistory as IEnumerable<MotorcycleRepairShop.Models.RepairOrder>;
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="bi bi-person-lines-fill"></i> ແຟ້ມປະຫວັດລູກຄ້າ</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning me-2">
+            <i class="bi bi-pencil"></i> ແກ້ໄຂຂໍ້ມູນສ່ວນຕົວ
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> ກັບໜ้າລາຍຊື່
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- รายละเอียดส่วนตัว -->
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white fw-bold">
+                <i class="bi bi-info-circle"></i> ຂໍ້ມູນລູກຄ້າແລະລົດ
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <div class="bg-light rounded-circle d-inline-flex justify-content-center align-items-center" style="width: 80px; height: 80px;">
+                        <i class="bi bi-person fa-2x text-secondary" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h4 class="mt-2 fw-bold text-primary">@Model.Name</h4>
+                </div>
+                
+                <table class="table table-sm table-borderless">
+                    <tr>
+                        <th class="text-muted" width="35%"><i class="bi bi-telephone"></i> ເບີໂທ:</th>
+                        <td>
+                            @if (!string.IsNullOrEmpty(Model.Phone))
+                            {
+                                <div class="btn-group btn-group-sm">
+                                    <a href="tel:@Model.Phone" class="btn btn-outline-primary" title="ໂທຫາ">
+                                        <i class="bi bi-telephone-fill"></i> @Model.Phone
+                                    </a>
+                                    <a href="https://wa.me/@(Model.Phone.StartsWith("0") ? "856" + Model.Phone.Substring(1) : (Model.Phone.StartsWith("20") || Model.Phone.StartsWith("30") ? "856" + Model.Phone : Model.Phone))" 
+                                       target="_blank" class="btn btn-outline-success" title="ສົ່ງ WhatsApp">
+                                        <i class="bi bi-whatsapp"></i> WhatsApp
+                                    </a>
+                                </div>
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted"><i class="bi bi-geo-alt"></i> ທີ່ຢູ່:</th>
+                        <td>@(string.IsNullOrEmpty(Model.Address) ? "-" : Model.Address)</td>
+                    </tr>
+                    <tr><td colspan="2"><hr class="my-2"></td></tr>
+                    <tr>
+                        <th class="text-muted"><i class="bi bi-card-text"></i> ທະບຽນລົດ:</th>
+                        <td><span class="badge bg-secondary fs-6">@Model.LicensePlate</span></td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted"><i class="bi bi-bicycle"></i> ຍີ່ຫໍ້/ລຸ້ນ:</th>
+                        <td class="fw-bold">@Model.MotorcycleBrand @Model.MotorcycleModel</td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted"><i class="bi bi-calendar"></i> ປີຜະລິດ:</th>
+                        <td>@(Model.Year?.ToString() ?? "-")</td>
+                    </tr>
+                    <tr><td colspan="2"><hr class="my-2"></td></tr>
+                    <tr>
+                        <th class="text-muted"><i class="bi bi-clock-history"></i> ເພີ່ມໃນລະບົບ:</th>
+                        <td class="small">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ประวัติการซ่อม -->
+    <div class="col-md-8 mb-4">
+        <div class="card shadow-sm h-100 border-0">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <span class="fw-bold"><i class="bi bi-clock-history"></i> ປະຫວັດການເຂົ້າໃຊ້ບໍລິການ (10 ຄັ້ງຫຼ້າສຸດ)</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ວັນທີສ້ອມ</th>
+                                <th>ເລກທີບິນ</th>
+                                <th>ອາການ / ບໍລິການຫຼັກ</th>
+                                <th class="text-center">ກວດສອບ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (repairHistory != null && repairHistory.Any())
+                            {
+                                foreach (var order in repairHistory)
+                                {
+                                    <tr>
+                                        <td>@order.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                        <td>
+                                            <a asp-controller="RepairOrder" asp-action="Details" asp-route-id="@order.Id" class="text-primary fw-bold text-decoration-none">
+                                                @order.OrderNumber
+                                            </a>
+                                        </td>
+                                        <td class="text-truncate" style="max-width: 250px;">@order.ProblemDescription</td>
+                                        <td class="text-center">
+                                            @if(order.Status == "Completed") {
+                                                <span class="badge bg-success"><i class="bi bi-check-circle"></i> ສຳເລັດ</span>
+                                            } else if(order.Status == "Cancelled") {
+                                                <span class="badge bg-danger"><i class="bi bi-x-circle"></i> ຍົກເລີກ</span>
+                                            } else {
+                                                <span class="badge bg-warning text-dark"><i class="bi bi-tools"></i> 
+                                                    @(order.Status == "Pending" ? "ລໍຖ້າສ້ອມ" : "ກຳລັງສ້ອມ")
+                                                </span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-muted">
+                                        <i class="bi bi-journal-x fa-3x mb-3 d-block" style="font-size: 2rem;"></i>
+                                        ຄັນນີ້ຍັງບໍ່ເຄີຍມີປະຫວັດການເຂົ້າສ້ອມຮ້ານເຮົາ
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

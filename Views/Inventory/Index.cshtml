@@ -1,0 +1,193 @@
+@model IEnumerable<MotorcycleRepairShop.Models.Part>
+@{
+    ViewData["Title"] = "ຈັດການສະຕ໋ອກອາໄຫຼ່";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">ຈັດການສະຕ໋ອກອາໄຫຼ່</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> ເພີ່ມອາໄຫຼ່
+            </a>
+            <a asp-action="Scan" class="btn btn-info">
+                <i class="bi bi-upc-scan"></i> ສະແກນບາໂຄ້ດ
+            </a>
+            <a asp-action="PrintLabels" class="btn btn-warning">
+                <i class="bi bi-printer"></i> ພິມປ້າຍບາໂຄ້ດ
+            </a>
+            <a asp-action="Logs" class="btn btn-outline-primary shadow-sm">
+                <i class="fas fa-history me-1"></i> ປະຫວັດການເຄື່ອນໄຫວ
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Search Form -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-md-8">
+                <input type="text" name="search" class="form-control" placeholder="ຄົ້ນຫາຊື່ອາໄຫຼ່ ຫຼື ລຸ້ນລົດ..." value="@ViewBag.Search">
+            </div>
+            <div class="col-md-2">
+                <select name="category" class="form-select">
+                    <option value="">ທຸກໝວດອາໄຫຼ່</option>
+                    <option value="engine">ເຄື່ອງຈັກ</option>
+                    <option value="brake">ເບກ</option>
+                    <option value="tire">ຢາງ/ລໍ້</option>
+                    <option value="electrical">ໄຟຟ້າ</option>
+                    <option value="transmission">ລະບົບຂັບເຄື່ອນ/ໂສ້</option>
+                    <option value="suspension">ກັນສະເທືອນ/ໂຊ໊ກ</option>
+                    <option value="body">ຊຸດສີ/ໂຄງລົດ</option>
+                    <option value="liquid">ນ້ຳມັນເຄື່ອງ/ຂອງແຫຼວ</option>
+                    <option value="accessory">ອຸປະກອນເສີມ</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-outline-primary w-100">ຄົ້ນຫາ</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Parts Table -->
+<div class="card shadow">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>ລະຫັດ</th>
+                        <th>ຊື່ອາໄຫຼ່</th>
+                        <th>ບາໂຄ້ດ</th>
+                        <th>ລຸ້ນທີ່ຮອງຮັບ</th>
+                        <th>ລາຄາ</th>
+                        <th>ສະຕັອກ</th>
+                        <th>ສະຖານະ</th>
+                        <th class="text-center">ຈັດການ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var part in Model)
+                    {
+                        <tr class="@(part.StockQuantity <= part.MinStockLevel ? "low-stock" : "")">
+                            <td>@part.PartNumber</td>
+                            <td>
+                                <strong>@part.Name</strong>
+                                @if (!string.IsNullOrEmpty(part.Description))
+                                {
+                                    <br><small class="text-muted">@part.Description</small>
+                                }
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(part.Barcode))
+                                {
+                                    <span class="badge bg-secondary">@part.Barcode</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td>
+                                @if (part.CompatibleModels != null && part.CompatibleModels.Length > 0)
+                                {
+                                    <small>@string.Join(", ", part.CompatibleModels.Take(2))</small>
+                                    if (part.CompatibleModels.Length > 2)
+                                    {
+                                        <span class="text-muted">...</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td>@part.Price.ToString("N0") ₭</td>
+                            <td>
+                                <span class="badge bg-@(part.StockQuantity <= part.MinStockLevel ? "danger" : "success")">
+                                    @part.StockQuantity @part.Unit
+                                </span>
+                                @if (part.StockQuantity <= part.MinStockLevel)
+                                {
+                                    <br><small class="text-danger">ສະຕັອກຕ່ຳ</small>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-outline-success" onclick="updateStock(@part.Id, 'add')">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-warning" onclick="updateStock(@part.Id, 'remove')">
+                                        <i class="bi bi-dash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    <a asp-action="Logs" asp-route-partId="@part.Id" class="btn btn-sm btn-outline-secondary" title="ເບິ່ງປະຫວັດ">
+                                        <i class="bi bi-clock-history"></i>
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@part.Id" class="btn btn-sm btn-outline-info">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@part.Id" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-action="PrintLabels" asp-route-id="@part.Id" class="btn btn-sm btn-outline-warning" title="ພິມປ້າຍບາໂຄ້ດ">
+                                        <i class="bi bi-printer"></i>
+                                    </a>
+                                    <form asp-action="Delete" asp-route-id="@part.Id" method="post" onsubmit="return confirm('ທ່ານຕ້ອງການລຶບອາໄຫຼ່ນີ້ແມ່ນບໍ່?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        
+        @if (!Model.Any())
+        {
+            <div class="text-center py-4">
+                <i class="bi bi-box-seam fa-3x text-muted"></i>
+                <p class="text-muted mt-2">ບໍ່ພົບຂໍ້ມູນອາໄຫຼ່</p>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateStock(partId, operation) {
+            const quantity = prompt(`ກະລຸນາລະບຸຈຳນວນທີ່ຕ້ອງການ${operation === 'add' ? 'ເພີ່ມ' : 'ລົດ'}:`, '1');
+            if (quantity && !isNaN(quantity)) {
+                const note = prompt("ກະລຸນາລະບຸເຫດຜົນ (ຖ້າມີ):", "");
+                
+                fetch('/Inventory/UpdateStock', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `id=${partId}&quantity=${quantity}&operation=${operation}&note=${encodeURIComponent(note || '')}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('ເກີດຂໍ้ຜິດພາດໃນການອັບເດດສະຕັອກ');
+                });
+            }
+        }
+    </script>
+}

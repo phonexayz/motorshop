@@ -1,0 +1,121 @@
+@model MechanicPayoutReportViewModel
+
+@{
+    ViewData["Title"] = "ລາຍງານຄ່າແຮງຊ່າງ";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="bi bi-people-fill text-primary"></i> ລາຍງານຄ່າແຮງຊ່າງ (Mechanic Payouts)</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.print()">
+                <i class="bi bi-printer"></i> ພິມລາຍງານ
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Section -->
+<div class="card shadow-sm border-0 mb-4 bg-light">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label fw-bold">ເລີ່ມວັນທີ</label>
+                <input type="date" name="startDate" class="form-control" value="@Model.StartDate.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold">ຫາວັນທີ</label>
+                <input type="date" name="endDate" class="form-control" value="@Model.EndDate.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-4 d-grid">
+                <button type="submit" class="btn btn-primary fw-bold">
+                    <i class="bi bi-search"></i> ຄົ້ນຫາຂໍ້ມູນ
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm border-0 bg-primary text-white overflow-hidden">
+            <div class="card-body position-relative">
+                <div class="mb-3 opacity-75 small">ລວມຄ່າຄອມມິດຊັນທັງໝົດ</div>
+                <h3 class="mb-0 fw-bold">@Model.TotalCommission.ToString("N0") <span class="small fw-normal">ກີບ</span></h3>
+                <i class="bi bi-cash-stack position-absolute end-0 bottom-0 m-3 opacity-25 display-2"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm border-0 bg-info text-white overflow-hidden">
+            <div class="card-body position-relative">
+                <div class="mb-3 opacity-75 small">ຈຳນວນຊ່າງທີ່ມີລາຍໄດ້</div>
+                <h3 class="mb-0 fw-bold">@Model.Payouts.Count(p => p.TotalJobs > 0) <span class="small fw-normal">ຄົນ</span></h3>
+                <i class="bi bi-person-check-fill position-absolute end-0 bottom-0 m-3 opacity-25 display-2"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm border-0 bg-success text-white overflow-hidden">
+            <div class="card-body position-relative">
+                <div class="mb-3 opacity-75 small">ລວມຈຳນວນຄັນ (Jobs)</div>
+                <h3 class="mb-0 fw-bold">@Model.Payouts.Sum(p => p.TotalJobs) <span class="small fw-normal">ຄັນ</span></h3>
+                <i class="bi bi-tools position-absolute end-0 bottom-0 m-3 opacity-25 display-2"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Details Table -->
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-list-ul"></i> ລາຍລະອຽດລາຍໄດ້ລາຍຊື່</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">ຊື່ຊ່າງ</th>
+                        <th class="text-center">ຈຳນວນວຽກ (Jobs)</th>
+                        <th class="text-end">ລວມຄ່າແຮງ (Labor Revenue)</th>
+                        <th class="text-end pe-4 text-primary">ຄ່າຄອມມິດຊັນ (Commission)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Payouts.Any())
+                    {
+                        foreach (var item in Model.Payouts.OrderByDescending(p => p.TotalCommissionEarned))
+                        {
+                            <tr>
+                                <td class="ps-4 fw-bold">@item.MechanicName</td>
+                                <td class="text-center">@item.TotalJobs</td>
+                                <td class="text-end">@item.TotalLaborRevenue.ToString("N0") ກີບ</td>
+                                <td class="text-end pe-4 fw-bold text-primary">@item.TotalCommissionEarned.ToString("N0") ກີບ</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">ຍັງບໍ່ມີຂໍ້ມູນລາຍໄດ້ໃນຊ່ວງເວລານີ້</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot class="table-light fw-bold">
+                    <tr>
+                        <td class="ps-4">ລວມທັງໝົດ</td>
+                        <td class="text-center">@Model.Payouts.Sum(p => p.TotalJobs)</td>
+                        <td class="text-end">@Model.Payouts.Sum(p => p.TotalLaborRevenue).ToString("N0") ກີບ</td>
+                        <td class="text-end pe-4 text-primary">@Model.TotalCommission.ToString("N0") ກີບ</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4 text-muted small">
+    <i class="bi bi-info-circle"></i> ໝາຍເຫດ: ຄ່າຄອມມິດຊັນແມ່ນຄິດໄລ່ຈາກເປີເຊັນທີ່ຕັ້ງໄວ້ໃຫ້ຊ່າງແຕ່ລະຄົນ ໃນຂະນະທີ່ປິດວຽກສ້ອມແປງ.
+</div>

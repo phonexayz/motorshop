@@ -1,0 +1,55 @@
+@model MotorcycleRepairShop.Models.Appointment
+@{
+    ViewData["Title"] = "ເພີ່ມຄິວນັດໃໝ່";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="bi bi-calendar-plus"></i> ຈອງຄິວນັດໝາຍໃໝ່</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> ກັບໄປຕາຕະລາງນັດ
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card shadow-sm border-primary">
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="CustomerId" class="form-label fw-bold">ເລືອກລູກຄ້າທີ່ຈະຈອງຄິວ <span class="text-danger">*</span></label>
+                        <select asp-for="CustomerId" class="form-select" asp-items="ViewBag.Customers" required>
+                            <option value="">-- ເລືອກລູກຄ້າ --</option>
+                        </select>
+                        <span asp-validation-for="CustomerId" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3 border rounded p-3 bg-light">
+                        <label asp-for="AppointmentDate" class="form-label fw-bold text-primary"><i class="bi bi-clock"></i> ວັນແລະເວລາທີ່ນັດໝາຍ <span class="text-danger">*</span></label>
+                        <input asp-for="AppointmentDate" class="form-control" type="datetime-local" required />
+                        <span asp-validation-for="AppointmentDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Reason" class="form-label fw-bold">ແຈ້ງອາການຫຼືສິ່ງທີ່ຕ້ອງການໃຫ້ເຮັດ</label>
+                        <textarea asp-for="Reason" class="form-control" rows="3" placeholder="ເຊັ່ນ ປ່ຽນນ້ຳມັນເຄື່ອງ, ປ່ຽນຢາງ, ເຄື່ອງມີສຽງດັງ..."></textarea>
+                        <span asp-validation-for="Reason" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary fw-bold">
+                            <i class="bi bi-save"></i> ບັນທຶກຄິວນັດໝາຍ
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

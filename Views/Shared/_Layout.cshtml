@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ຮ້ານສ້ອມແປງລົດຈັກ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    @inject MotorcycleRepairShop.Services.IAuthService AuthService
+    @{
+        var role = AuthService.GetCurrentRole() ?? "";
+        bool isAdmin = role == "Admin";
+        bool isOwner = role == "Owner";
+        bool isDirector = role == "Director";
+        bool isManager = role == "Manager";
+        bool isStaff = role == "Staff";
+        bool isMechanic = role == "Mechanic";
+
+        // Permission Groups
+        bool canViewSettings = isAdmin || isOwner;
+        bool canViewUsers = isAdmin || isOwner || isDirector;
+        bool canViewReportsAndExpenses = canViewUsers || isManager;
+        bool canViewSuppliers = canViewUsers || isManager;
+        bool canViewMechanicMgmt = canViewUsers || isManager;
+        bool canViewServiceRates = canViewUsers || isManager;
+        bool canViewInventory = canViewReportsAndExpenses || isStaff;
+        bool canViewPosAndCustomer = canViewInventory;
+        bool canViewRepairOrders = canViewPosAndCustomer || isMechanic;
+    }
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-4 pb-3 px-3">
+                    <h5 class="sidebar-heading text-center mb-4"><i class="bi bi-tools text-primary me-2" style="color: var(--purple-primary) !important;"></i>ຮ້ານສ້ອມແປງລົດຈັກ</h5>
+                    <ul class="nav flex-column">
+                        @if (canViewRepairOrders)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")" 
+                                   asp-controller="Home" asp-action="Index">
+                                    <i class="bi bi-house-door"></i> ແດຊບອດ
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "RepairOrder" && ViewContext.RouteData.Values["Action"]?.ToString() != "Dashboard" && ViewContext.RouteData.Values["Action"]?.ToString() != "History" ? "active" : "")" 
+                                   asp-controller="RepairOrder" asp-action="Index">
+                                    <i class="bi bi-clipboard-check"></i> ໃບສັ່ງສ້ອມ
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "RepairOrder" && ViewContext.RouteData.Values["Action"]?.ToString() == "History" ? "active" : "")" 
+                                   asp-controller="RepairOrder" asp-action="History">
+                                    <i class="bi bi-clock-history"></i> ປະຫວັດສ້ອມແປງລົດ
+                                </a>
+                            </li>
+                        }
+
+                        @if (canViewInventory)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Inventory" ? "active" : "")" 
+                                   asp-controller="Inventory" asp-action="Index">
+                                    <i class="bi bi-box-seam"></i> ຄັງສະຕ໋ອກອາໄຫຼ່
+                                </a>
+                            </li>
+                        }
+                        @if (canViewSuppliers)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Supplier" ? "active" : "")" 
+                                   asp-controller="Supplier" asp-action="Index">
+                                    <i class="bi bi-truck"></i> ຈັດການຮ້ານຂາຍສົ່ງ
+                                </a>
+                            </li>
+                        }
+
+                        @if (canViewPosAndCustomer)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Customer" ? "active" : "")" 
+                                   asp-controller="Customer" asp-action="Index">
+                                    <i class="bi bi-people"></i> ຈັດການຖານຂໍ້ມູນລູກຄ້າ
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Appointment" ? "active" : "")" 
+                                   asp-controller="Appointment" asp-action="Index">
+                                    <i class="bi bi-calendar-event"></i> ຕາຕະລາງນັດໝາຍລູກຄ້າ
+                                </a>
+                            </li>
+                        }
+
+                        @if (canViewServiceRates)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Service" ? "active" : "")" 
+                                   asp-controller="Service" asp-action="Index">
+                                    <i class="bi bi-tools"></i> ອັດຕາຄ່າບໍລິການ
+                                </a>
+                            </li>
+                        }
+
+                        @if (canViewPosAndCustomer)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Pos" ? "active" : "")" 
+                                   asp-controller="Pos" asp-action="Index">
+                                    <i class="bi bi-cart-check"></i> ຂາຍໜ້າຮ້ານ (POS)
+                                </a>
+                            </li>
+                        }
+                        @if (canViewReportsAndExpenses)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Report" && ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")" 
+                                   asp-controller="Report" asp-action="Index">
+                                    <i class="bi bi-graph-up-arrow"></i> ສະຫຼຸບຍອດຂາຍ
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Report" && ViewContext.RouteData.Values["Action"]?.ToString() == "MechanicPayouts" ? "active" : "")" 
+                                   asp-controller="Report" asp-action="MechanicPayouts">
+                                    <i class="bi bi-person-lines-fill"></i> ລາຍງານຄ່າແຮງຊ່າງ
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Expense" ? "active" : "")" 
+                                   asp-controller="Expense" asp-action="Index">
+                                    <i class="bi bi-wallet2"></i> ຈັດການລາຍຈ່າຍຮ້ານ
+                                </a>
+                            </li>
+                        }
+                        <hr class="mx-3 my-2" style="border-top-width: 2px; border-color: rgba(99, 102, 241, 0.1);">
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "RepairOrder" && ViewContext.RouteData.Values["Action"]?.ToString() == "Dashboard" ? "active" : "")" 
+                               asp-controller="RepairOrder" asp-action="Dashboard">
+                                <i class="bi bi-wrench-adjustable"></i> ແດຊບອດຊ່າງສ້ອມ
+                            </a>
+                        </li>
+                        @if (canViewUsers)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "User" ? "active" : "")" 
+                                   asp-controller="User" asp-action="Index">
+                                    <i class="bi bi-person-gear"></i> ພະນັກງານ/ຜູ້ດູແລ
+                                </a>
+                            </li>
+                        }
+                        @if (canViewMechanicMgmt)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Mechanic" ? "active" : "")" 
+                                   asp-controller="Mechanic" asp-action="Index">
+                                    <i class="bi bi-person-badge"></i> ຈັດການລາຍຊື່ຊ່າງ
+                                </a>
+                            </li>
+                        }
+                        @if (canViewSettings)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Settings" && ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")" 
+                                   asp-controller="Settings" asp-action="Index">
+                                    <i class="bi bi-gear"></i> ຕັ້ງຄ່າລະບົບ
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Settings" && ViewContext.RouteData.Values["Action"]?.ToString() == "AuditLogs" ? "active" : "")" 
+                                   asp-controller="Settings" asp-action="AuditLogs">
+                                    <i class="bi bi-shield-check"></i> ບັນທຶກລະບົບ
+                                </a>
+                            </li>
+                        }
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Account" && ViewContext.RouteData.Values["Action"]?.ToString() == "Profile" ? "active" : "")" 
+                               asp-controller="Account" asp-action="Profile">
+                                <i class="bi bi-person-circle text-primary"></i> ຂໍ້ມູນສ່ວນຕົວ
+                            </a>
+                        </li>
+                        <li class="nav-item mt-5 pt-3" style="border-top: 1px solid rgba(99, 102, 241, 0.1);">
+                            <a class="nav-link text-danger" asp-controller="Account" asp-action="Logout">
+                                <i class="bi bi-box-arrow-right text-danger"></i> ອອກຈາກລະບົບ
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <!-- Top Navbar with Notifications -->
+                <div class="top-navbar">
+                    <div class="dropdown me-3">
+                        <button class="notification-bell dropdown-toggle" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="border:none; padding:0;">
+                            <i class="bi bi-bell"></i>
+                            <span class="notification-badge d-none" id="lowStockCount">0</span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end notification-dropdown" aria-labelledby="notificationDropdown">
+                            <div class="notification-header">
+                                <span>ການແຈ້ງເຕືອນ</span>
+                                <span class="badge bg-danger rounded-pill" id="lowStockCountLabel">0</span>
+                            </div>
+                            <div class="notification-body" id="notificationContent">
+                                <div class="p-4 text-center text-muted">
+                                    <i class="bi bi-check2-circle fs-1 mb-2"></i>
+                                    <p class="small mb-0">ບໍ່ມີການແຈ้งເຕືອນ</p>
+                                </div>
+                            </div>
+                            <div class="notification-footer">
+                                <a asp-controller="Inventory" asp-action="LowStock">ເບິ່ງລາຍການທັງໝົດ</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center">
+                        <div class="avatar-circle me-2">@AuthService.GetCurrentUsername()?.Substring(0, 1).ToUpper()</div>
+                        <div class="d-none d-md-block">
+                            <div class="fw-bold small">@AuthService.GetCurrentUsername()</div>
+                            <div class="text-muted" style="font-size: 0.7rem;">@AuthService.GetCurrentRole()</div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        @TempData["Success"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        @TempData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            flatpickr("input[type='date']", {
+                dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "d/m/Y",
+                allowInput: true
+            });
+            flatpickr("input[type='datetime-local']", {
+                enableTime: true,
+                dateFormat: "Y-m-d\\TH:i",
+                altInput: true,
+                altFormat: "d/m/Y H:i",
+                allowInput: true
+            });
+
+            // Global delete confirm
+            document.querySelectorAll('form[onsubmit*="return confirm"]').forEach(form => {
+                const originalOnsubmit = form.getAttribute('onsubmit');
+                form.removeAttribute('onsubmit');
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'ຢືນຢັນການລຶບ?',
+                        text: "ທ່ານຕ້ອງການລຶບຂໍ້ມູນນີ້ແທ້ບໍ່? ຂໍ້ມູນຈະບໍ່ສາມາດກູ້ຄືນໄດ້!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'ຢືນຢັນລຶບ',
+                        cancelButtonText: 'ຍົກເລີກ'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Function to fetch low stock alerts
+            async function fetchLowStockAlerts() {
+                try {
+                    const response = await fetch('/Inventory/GetLowStockAlerts');
+                    const data = await response.json();
+                    
+                    const badge = document.getElementById('lowStockCount');
+                    const label = document.getElementById('lowStockCountLabel');
+                    const content = document.getElementById('notificationContent');
+                    
+                    if (data.count > 0) {
+                        badge.textContent = data.count;
+                        badge.classList.remove('d-none');
+                        label.textContent = data.count;
+                        
+                        let html = '';
+                        data.items.forEach(item => {
+                            html += `
+                                <a href="/Inventory/Details/${item.id}" class="notification-item">
+                                    <div class="notification-badge-item">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                    </div>
+                                    <div class="notification-content">
+                                        <p>${item.name}</p>
+                                        <span>ສະຕ໋ອກຄົງເຫຼືອ: <b class="text-danger">${item.stock}</b> ${item.unit} (ຕ່ຳກວ່າ ${item.min})</span>
+                                    </div>
+                                </a>
+                            `;
+                        });
+                        content.innerHTML = html;
+                    } else {
+                        badge.classList.add('d-none');
+                        label.textContent = '0';
+                        content.innerHTML = `
+                            <div class="p-4 text-center text-muted">
+                                <i class="bi bi-check2-circle fs-1 mb-2"></i>
+                                <p class="small mb-0">ບໍ່ມີການແຈ້ງເຕືອນ</p>
+                            </div>
+                        `;
+                    }
+                } catch (error) {
+                    console.error('Error fetching low stock alerts:', error);
+                }
+            }
+
+            // Initial fetch
+            fetchLowStockAlerts();
+            
+            // Refresh every 5 minutes
+            setInterval(fetchLowStockAlerts, 300000);
+        });
+    </script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

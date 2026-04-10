@@ -1,0 +1,24 @@
+# .NET Gitignore
+[Bb]in/
+[Oo]bj/
+out/
+build.log
+build_errors.txt
+
+# VS Code
+.vscode/
+.history/
+
+# Visual Studio
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+
+# OS
+.DS_Store
+Thumbs.db
+
+# App Settings Shells
+appsettings.Development.json
+# appsettings.json (Optional: Keep it if you want to push templates, but we used placeholders)

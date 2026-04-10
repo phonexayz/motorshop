@@ -1,0 +1,73 @@
+@model IEnumerable<MotorcycleRepairShop.Models.Mechanic>
+
+@{
+    ViewData["Title"] = "ຈັດການລາຍຊື່ຊ່າງ";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="bi bi-person-badge text-primary"></i> ຈັດການລາຍຊື່ຊ່າງ</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> ເພີ່ມຊ່າງໃໝ່
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">ຊື່ຊ່າງ</th>
+                        <th>ເບີໂທລະສັບ</th>
+                        <th>ຄວາມຊຳນານ</th>
+                        <th class="text-center">ສ່ວນແບ່ງ (%)</th>
+                        <th class="text-center">ສະຖານະ</th>
+                        <th class="text-end pe-4">ຈັດການ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-bold">@item.Name</td>
+                                <td class="text-muted">@(item.Phone ?? "-")</td>
+                                <td>@(item.Specialization ?? "-")</td>
+                                <td class="text-center fw-bold text-primary">@item.CommissionRate %</td>
+                                <td class="text-center">
+                                    @if (item.IsActive)
+                                    {
+                                        <span class="badge bg-success-subtle text-success rounded-pill px-3">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3">Inactive</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-warning" title="ແກ້ໄຂ">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger" title="ລຶບ">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">ຍັງບໍ່ມີລາຍຊື່ຊ່າງໃນລະບົບ</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

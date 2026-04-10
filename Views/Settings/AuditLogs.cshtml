@@ -1,0 +1,74 @@
+@model List<MotorcycleRepairShop.Models.AuditLog>
+@{
+    ViewData["Title"] = "ບັນທຶກລະບົບ";
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold text-dark border-start border-primary border-5 ps-3">ບັນທຶກການເຄື່ອນໄຫວໃນລະບົບ (Audit Logs)</h2>
+            <p class="text-muted">ກວດສອບປະຫວັດການເຂົ້າໃຊ້ງານ ແລະ ການປ່ຽນແປງຂໍ້ມູນສຳຄັນ</p>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4 py-3">ວັນທີ & ເວລາ</th>
+                            <th class="py-3">ຜູ້ໃຊ້</th>
+                            <th class="py-3">ການກະທຳ</th>
+                            <th class="py-3">ຂໍ້ມູນ</th>
+                            <th class="py-3">ລາຍລະອຽດ</th>
+                            <th class="pe-4 py-3">IP Address</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var log in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold">@log.Timestamp.ToString("dd/MM/yyyy")</div>
+                                    <small class="text-muted">@log.Timestamp.ToString("HH:mm:ss")</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">
+                                        <i class="bi bi-person-fill me-1"></i> @log.Username
+                                    </span>
+                                </td>
+                                <td>
+                                    @switch (log.Action)
+                                    {
+                                        case "CREATE": <span class="badge bg-success">CREATE</span> break;
+                                        case "UPDATE": <span class="badge bg-info text-dark">UPDATE</span> break;
+                                        case "DELETE": <span class="badge bg-danger">DELETE</span> break;
+                                        case "LOGIN": <span class="badge bg-primary">LOGIN</span> break;
+                                        default: <span class="badge bg-secondary">@log.Action</span> break;
+                                    }
+                                </td>
+                                <td>
+                                    <span class="fw-bold">@log.EntityName</span>
+                                    @if (!string.IsNullOrEmpty(log.EntityId))
+                                    {
+                                        <span class="text-muted small">#@log.EntityId</span>
+                                    }
+                                </td>
+                                <td>@log.Details</td>
+                                <td class="pe-4 small text-muted">@log.IpAddress</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-journal-x display-4 text-muted opacity-25"></i>
+                    <p class="mt-3 text-muted">ຍັງບໍ່ມີບັນທຶກການເຄື່ອນໄຫວ</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

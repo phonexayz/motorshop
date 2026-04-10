@@ -1,0 +1,388 @@
+@model MotorcycleRepairShop.Models.RepairOrder
+@{
+    ViewData["Title"] = "ລາຍລະອຽດໃບສັ່ງສ້ອມ";
+    var parts = ViewBag.Parts as IEnumerable<MotorcycleRepairShop.Models.Part>;
+    var services = ViewBag.Services as IEnumerable<MotorcycleRepairShop.Models.Service>;
+    var mechanics = ViewBag.Mechanics as IEnumerable<MotorcycleRepairShop.Models.Mechanic>;
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="bi bi-file-text"></i> ລາຍລະອຽດໃບສັ່ງສ້ອມ #@Model.OrderNumber</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a asp-action="Print" asp-route-id="@Model.Id" target="_blank" class="btn btn-primary me-2">
+            <i class="bi bi-printer"></i> ພິມໃບຮັບເງິນ/ບິນ
+        </a>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning me-2">
+            <i class="bi bi-pencil"></i> ແກ້ໄຂຂໍ້ມູນຫຼັກ
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> ກັບຄືນ
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- ຂໍ້ມູນໃບຮັບລົດ -->
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-light fw-bold">
+                ຂໍ້ມູນລູກຄ້າ ແລະ ລົດ
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-borderless">
+                    <tr>
+                        <th width="40%" class="text-muted">ລູກຄ້າ:</th>
+                        <td class="fw-bold">@(Model.Customer?.Name ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">ເບີໂທ:</th>
+                        <td>
+                            @if (!string.IsNullOrEmpty(Model.Customer?.Phone))
+                            {
+                                <div class="btn-group btn-group-sm">
+                                    <a href="tel:@Model.Customer.Phone" class="btn btn-outline-primary shadow-sm" title="ໂທຫາ">
+                                        <i class="bi bi-telephone-fill"></i> @Model.Customer.Phone
+                                    </a>
+                                    <a href="https://wa.me/@(Model.Customer.Phone.StartsWith("0") ? "856" + Model.Customer.Phone.Substring(1) : (Model.Customer.Phone.StartsWith("20") || Model.Customer.Phone.StartsWith("30") ? "856" + Model.Customer.Phone : Model.Customer.Phone))" 
+                                       target="_blank" class="btn btn-outline-success shadow-sm" title="ສົ່ງ WhatsApp">
+                                        <i class="bi bi-whatsapp"></i> WhatsApp
+                                    </a>
+                                </div>
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">ທະບຽນ:</th>
+                        <td><span class="badge bg-secondary">@Model.MotorcycleLicensePlate</span></td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">ລົດ:</th>
+                        <td>@(Model.Customer?.MotorcycleBrand) @(Model.Customer?.MotorcycleModel)</td>
+                    </tr>
+                    <tr><td colspan="2"><hr class="my-1"></td></tr>
+                    <tr>
+                        <th class="text-muted">ວັນທີຮັບລົດ:</th>
+                        <td>@Model.CreatedAt.ToString("dd/MM/yy HH:mm")</td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted align-top">ອາການເສຍ:</th>
+                        <td class="text-danger">@Model.ProblemDescription</td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted align-top">ໝາຍເຫດຊ່າງ:</th>
+                        <td>@(string.IsNullOrEmpty(Model.MechanicNotes) ? "-" : Model.MechanicNotes)</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ຂໍ້ມູນຊ່າງທີ່ຮັບຜິດຊອບ -->
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100 border-warning">
+            <div class="card-header bg-warning text-dark fw-bold">
+                <i class="bi bi-person-badge"></i> ຊ່າງທີ່ຮັບຜິດຊອບ
+            </div>
+            <div class="card-body">
+                @if (Model.Mechanic != null)
+                {
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; font-size: 1.5rem;">
+                            @Model.Mechanic.Name.Substring(0, 1)
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold">@Model.Mechanic.Name</h5>
+                            <small class="text-muted">@Model.Mechanic.Phone</small>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-3 mb-3 bg-light rounded border">
+                        <i class="bi bi-person-dash fs-2 text-muted"></i>
+                        <p class="mb-0 text-muted small">ຍັງບໍ່ໄດ້ມອບໝາຍຊ່າງ</p>
+                    </div>
+                }
+
+                @if (Model.Status != "Completed" && Model.Status != "Cancelled")
+                {
+                    <div class="mt-3 pt-3 border-top">
+                        <label class="form-label small fw-bold">ມອບໝາຍຊ່າງ</label>
+                        <select id="selectMechanic" class="form-select form-select-sm">
+                            <option value="">-- ເລືອກຊ່າງ --</option>
+                            @if (mechanics != null)
+                            {
+                                foreach (var m in mechanics)
+                                {
+                                    <!option value="@m.Id" @(Model.MechanicId == m.Id ? "selected" : "")>@m.Name</!option>
+                                }
+                            }
+                        </select>
+                        <button type="button" id="btnAssignMechanic" class="btn btn-sm btn-primary w-100 mt-2">
+                            <i class="bi bi-person-check"></i> ຢືນຢັນການມອບໝາຍ
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- ສ່ວນຂອງການເພີ່ມອາໄຫຼ່ສະຖານະ -->
+    <div class="col-md-8 mb-4">
+        <div class="card shadow-sm h-100 border-primary">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <span class="fw-bold"><i class="bi bi-tools"></i> ຈັດການລາຍການສ້ອມ/ເບີກອາໄຫຼ່</span>
+                <span class="badge bg-light text-primary">ສະຖານະ: @Model.Status</span>
+            </div>
+            <div class="card-body">
+                <!-- ฟอร์มเบิกอะไหล่รวดเร็ว -->
+                @if(Model.Status != "Completed" && Model.Status != "Cancelled") {
+                    <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                      <li class="nav-item" role="presentation">
+                        <button class="nav-link active btn-sm py-1 me-2" id="pills-part-tab" data-bs-toggle="pill" data-bs-target="#pills-part" type="button" role="tab" aria-controls="pills-part" aria-selected="true"><i class="bi bi-box-seam"></i> ເບີກອາໄຫຼ່</button>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <button class="nav-link btn-sm py-1" id="pills-service-tab" data-bs-toggle="pill" data-bs-target="#pills-service" type="button" role="tab" aria-controls="pills-service" aria-selected="false"><i class="bi bi-wrench"></i> ເພີ່ມຄ່າບໍລິການ</button>
+                      </li>
+                    </ul>
+
+                    <div class="tab-content" id="pills-tabContent">
+                        <div class="tab-pane fade show active" id="pills-part" role="tabpanel" aria-labelledby="pills-part-tab">
+                            <form id="addPartForm" class="row g-2 align-items-end mb-4 bg-light p-2 rounded">
+                                <input type="hidden" id="orderId" value="@Model.Id" />
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold">ເລືອກອາໄຫຼ່ເຂົ້າລາຍການ</label>
+                                    <select id="partId" class="form-select form-select-sm" required>
+                                        <option value="">-- ຄົ້ນຫາ ຫຼື ເລືອກອາໄຫຼ່ --</option>
+                                        @if(parts != null) {
+                                            foreach(var p in parts) {
+                                                <option value="@p.Id" data-price="@p.Price" data-stock="@p.StockQuantity" disabled="@(p.StockQuantity <= 0 ? "disabled" : null)">
+                                                    @p.PartNumber - @p.Name (@p.Price.ToString("N0") ₭) [ເຫຼືອ @p.StockQuantity] 
+                                                </option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small fw-bold">ຈຳນວນ(ຊິ້ນ)</label>
+                                    <input type="number" id="qty" class="form-control form-control-sm" value="1" min="1" required />
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="button" id="btnAddPart" class="btn btn-sm btn-success w-100">
+                                        <i class="bi bi-plus-lg"></i> ເພີ່ມລົງບິນ
+                                    </button>
+                                </div>
+                                <div class="col-12 text-danger small mt-1 d-none" id="addPartAlert"></div>
+                            </form>
+                        </div>
+
+                        <div class="tab-pane fade" id="pills-service" role="tabpanel" aria-labelledby="pills-service-tab">
+                            <form id="addServiceForm" class="row g-2 align-items-end mb-4 bg-light p-2 rounded">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold">ເລືອກບໍລິການ</label>
+                                    <select id="serviceId" class="form-select form-select-sm" required>
+                                        <option value="">-- ເລືອກບໍລິການ --</option>
+                                        @if(services != null) {
+                                            foreach(var s in services) {
+                                                <option value="@s.Id" data-price="@s.BasePrice">
+                                                    @s.Name (@s.BasePrice.ToString("N0") ₭)
+                                                </option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small fw-bold">ຈຳນວນ</label>
+                                    <input type="number" id="serviceQty" class="form-control form-control-sm" value="1" min="1" required />
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="button" id="btnAddService" class="btn btn-sm btn-success w-100">
+                                        <i class="bi bi-plus-lg"></i> ເພີ່ມລົງບິນ
+                                    </button>
+                                </div>
+                                <div class="col-12 text-danger small mt-1 d-none" id="addServiceAlert"></div>
+                            </form>
+                        </div>
+                    </div>
+                }
+
+                <!-- ตารางรายการที่ใส่ในบิลนี้แล้ว -->
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ລະຫັດ</th>
+                                <th>ລາຍການ</th>
+                                <th class="text-end">ຈຳນວນ</th>
+                                <th class="text-end">ລາຄາ/ໜ່ວຍ</th>
+                                <th class="text-end">ລວມເປັນເງິນ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.OrderDetails != null && Model.OrderDetails.Any())
+                            {
+                                foreach (var detail in Model.OrderDetails)
+                                {
+                                    <tr>
+                                        <td>@(detail.Part?.PartNumber ?? "-")</td>
+                                        <td>
+                                            @(detail.Part != null ? detail.Part.Name : detail.Service != null ? detail.Service.Name : "ບໍ່ລະບຸ")
+                                        </td>
+                                        <td class="text-end">@detail.Quantity</td>
+                                        <td class="text-end">@detail.UnitPrice.ToString("N0") ₭</td>
+                                        <td class="text-end fw-bold">@((detail.Quantity * detail.UnitPrice).ToString("N0")) ₭</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-3">ຍັງບໍ່ມີລາຍການເບີກອາໄຫຼ່ ຫຼື ຄ່າບໍລິການ</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="table-group-divider">
+                            <tr>
+                                <td colspan="4" class="text-end fw-bold text-muted">ລວມຄ່າອາໄຫຼ່:</td>
+                                <td class="text-end text-dark fw-bold">@Model.PartsCost.ToString("N0") ₭</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="text-end fw-bold text-muted">ຄ່າແຮງຊ່າງ:</td>
+                                <td class="text-end text-dark fw-bold">@Model.LaborCost.ToString("N0") ₭</td>
+                            </tr>
+                            <tr class="table-primary">
+                                <td colspan="4" class="text-end fw-bold fs-5 text-primary">ຍອດລວມສຸດທິ:</td>
+                                <td class="text-end fs-5 text-primary fw-bold">@Model.TotalAmount.ToString("N0") ₭</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                @if(Model.Status == "InProgress") {
+                    <div class="mt-3 text-end">
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#completeModal">
+                            <i class="bi bi-check2-circle"></i> ປິດວຽກສ້ອມ (ແຈ້ງຍອດເກັບເງິນ)
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal ปิดงานซ่อม -->
+<div class="modal fade" id="completeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">ຢືນຢັນປິດວຽກ / ສະຫຼຸບຍອດເງິນ</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="completeForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">ຄ່າແຮງຊ່າງ</label>
+                        <input type="number" step="0.01" class="form-control" id="finalLaborCost" value="@Model.LaborCost" />
+                        <small class="text-muted">ສາມາດປັບເພີ່ມລົດໄດ້ທີ່ນີ້</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">ໝາຍເຫດ (ຖ້າມີ)</label>
+                        <textarea class="form-control" id="finalNotes" rows="2">@Model.MechanicNotes</textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ຍົກເລີກ</button>
+                <button type="button" class="btn btn-success" id="btnConfirmComplete">ຢືນຢັນປິດວຽກ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Add Part to Order
+            $('#btnAddPart').click(function() {
+                var orderId = $('#orderId').val();
+                var partId = $('#partId').val();
+                var quantity = $('#qty').val();
+
+                if(!partId || quantity < 1) {
+                    $('#addPartAlert').removeClass('d-none').text('ກະລຸນາເລືອກອາໄຫຼ່ ແລະ ລະບຸຈຳນວນທີ່ຖືກຕ້ອງ');
+                    return;
+                }
+
+                $.post('/RepairOrder/AddPart', { orderId: orderId, partId: partId, quantity: quantity }, function(res) {
+                    if(res.success) {
+                        location.reload(); // โหลดหน้าเว็บใหม่เพื่ออัปเดตตาราง
+                    } else {
+                        $('#addPartAlert').removeClass('d-none').text(res.message);
+                    }
+                }).fail(function() {
+                    $('#addPartAlert').removeClass('d-none').text('ເກີດຂໍ້ຜິດພາດໃນການເຊື່ອມຕໍ່');
+                });
+            });
+
+            // Add Service to Order
+            $('#btnAddService').click(function() {
+                var orderId = $('#orderId').val();
+                var serviceId = $('#serviceId').val();
+                var quantity = $('#serviceQty').val();
+
+                if(!serviceId || quantity < 1) {
+                    $('#addServiceAlert').removeClass('d-none').text('ກະລຸນາເລືອກບໍລິການ ແລະ ລະບຸຈຳນວນທີ່ຖືກຕ້ອງ');
+                    return;
+                }
+
+                $.post('/RepairOrder/AddService', { orderId: orderId, serviceId: serviceId, quantity: quantity }, function(res) {
+                    if(res.success) {
+                        location.reload();
+                    } else {
+                        $('#addServiceAlert').removeClass('d-none').text(res.message);
+                    }
+                }).fail(function() {
+                    $('#addServiceAlert').removeClass('d-none').text('ເກີດຂໍ້ຜິດພາດໃນການເຊື່ອມຕໍ່');
+                });
+            });
+
+            // Complete Repair
+            $('#btnConfirmComplete').click(function() {
+                var orderId = $('#orderId').val();
+                var laborCost = $('#finalLaborCost').val() || 0;
+                var notes = $('#finalNotes').val();
+
+                $.post('/RepairOrder/CompleteRepair', { id: orderId, laborCost: laborCost, notes: notes }, function(res) {
+                    if(res.success) {
+                        location.reload();
+                    } else {
+                        alert(res.message);
+                    }
+                });
+            });
+            // Assign Mechanic
+            $('#btnAssignMechanic').click(function() {
+                var orderId = $('#orderId').val();
+                var mechanicId = $('#selectMechanic').val();
+
+                if(!mechanicId) {
+                    Swal.fire({ icon: 'warning', title: 'ຄຳເຕືອນ', text: 'ກະລຸນາເລືອກຊ່າງກ່ອນ' });
+                    return;
+                }
+
+                $.post('/RepairOrder/AssignMechanic', { orderId: orderId, mechanicId: mechanicId }, function(res) {
+                    if(res.success) {
+                        Swal.fire({ icon: 'success', title: 'ສຳເລັດ', text: 'ມອບໝາຍຊ່າງຮຽບຮ້ອຍແລ້ວ', timer: 1500, showConfirmButton: false })
+                        .then(() => location.reload());
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'ຜິດພາດ', text: res.message });
+                    }
+                });
+            });
+        });
+    </script>
+}

@@ -1,0 +1,199 @@
+@model MotorcycleRepairShop.Models.RepairOrder
+@{
+    ViewData["Title"] = "ເປີດໃບສັ່ງສ້ອມໃໝ່";
+    var customers = ViewBag.Customers as List<MotorcycleRepairShop.Models.Customer>;
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="bi bi-file-earmark-plus"></i> ເປີດໃບສັ່ງສ້ອມໃໝ່</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> ກັບຄືນໜ້າລາຍການ
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">ຂໍ້ມູນໃບຮັບລົດ</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="OrderNumber" class="form-label fw-bold">ເລກທີໃບສັ່ງສ້ອມ</label>
+                            <input asp-for="OrderNumber" class="form-control bg-light" readonly />
+                            <span asp-validation-for="OrderNumber" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">ວັນທີຮັບລົດ</label>
+                            <input type="text" class="form-control bg-light" value="@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")" readonly disabled />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 border p-3 rounded bg-light">
+                        <label asp-for="CustomerId" class="form-label fw-bold">ເລືອກລູກຄ້າ / ເຈົ້າຂອງລົດ <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <select asp-for="CustomerId" class="form-select" id="customerSelect" required>
+                                <option value="">-- ກະລຸນາເລືອກລູກຄ້າ --</option>
+                                @if (customers != null)
+                                {
+                                    foreach (var c in customers)
+                                    {
+                                        <option value="@c.Id" data-plate="@c.LicensePlate">@c.Name (@c.LicensePlate) - @c.MotorcycleBrand @c.MotorcycleModel</option>
+                                    }
+                                }
+                            </select>
+                            <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#quickAddCustomerModal">
+                                <i class="bi bi-person-plus"></i> ເພີ່ມລູກຄ້າໃໝ່
+                            </button>
+                        </div>
+                        <span asp-validation-for="CustomerId" class="text-danger mt-1 d-block"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="MotorcycleLicensePlate" class="form-label fw-bold">ປ້າຍທະບຽນລົດທີ່ສ້ອມ <span class="text-danger">*</span></label>
+                            <input asp-for="MotorcycleLicensePlate" class="form-control" id="targetLicensePlate" placeholder="ຕົວຢ່າງ: ກຄ 1234 ນະຄອນຫຼວງ" required />
+                            <small class="text-muted">ດຶງຂໍ້ມູນອັດຕະໂນມັດເມື່ອເລືອກລູກຄ້າ, ແຕ່ສາມາດແກ້ໄຂໄດ້ຖ້າລູກຄ້ານຳລົດຄັນອື່ນມາ</small>
+                            <span asp-validation-for="MotorcycleLicensePlate" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Status" class="form-label fw-bold">ສະຖານະ</label>
+                            <select asp-for="Status" class="form-select">
+                                <option value="Pending">ລໍຖ້າຄິວສ້ອມ / ລໍຖ້າດຳເນີນການ</option>
+                                <option value="InProgress">ກຳລັງສ້ອມ</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ProblemDescription" class="form-label fw-bold">ອາການເສຍ / ສິ່ງທີ່ລູກຄ້າຕ້ອງການໃຫ້ເຮັດ <span class="text-danger">*</span></label>
+                        <textarea asp-for="ProblemDescription" class="form-control" rows="4" placeholder="ອະທິບາຍອາການຢ່າງລະອຽດ..." required></textarea>
+                        <span asp-validation-for="ProblemDescription" class="text-danger"></span>
+                    </div>
+
+                    <hr />
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="reset" class="btn btn-secondary">ລ້າງຂໍ້ມູນ</button>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-save"></i> ບັນທຶກໃບສັ່ງສ້ອມ
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Quick Add Customer -->
+<div class="modal fade" id="quickAddCustomerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-person-plus"></i> ເພີ່ມລູກຄ້າແບບດ່ວນ</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="quickAddForm">
+                    <div class="mb-3">
+                        <label class="form-label">ຊື່ ແລະ ນາມສະກຸນ <span class="text-danger">*</span></label>
+                        <input type="text" id="qaName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">ເບີໂທລະສັບ</label>
+                        <input type="text" id="qaPhone" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">ປ້າຍທະບຽນ <span class="text-danger">*</span></label>
+                        <input type="text" id="qaPlate" class="form-control" required />
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label">ຍີ່ຫໍ້ <span class="text-danger">*</span></label>
+                            <input type="text" id="qaBrand" class="form-control" required />
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label">ລຸ້ນ <span class="text-danger">*</span></label>
+                            <input type="text" id="qaModel" class="form-control" required />
+                        </div>
+                    </div>
+                </form>
+                <div id="qaAlert" class="alert alert-danger d-none py-2"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ຍົກເລີກ</button>
+                <button type="button" class="btn btn-success" id="btnSaveCustomer">ບັນທຶກ ແລະ ເລືອກ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function() {
+            // Auto fill license plate from dropdown
+            $('#customerSelect').change(function() {
+                var selectedOption = $(this).find('option:selected');
+                var plate = selectedOption.data('plate');
+                if (plate) {
+                    $('#targetLicensePlate').val(plate);
+                }
+            });
+
+            // Quick Add Customer logic
+            $('#btnSaveCustomer').click(function() {
+                const customerData = {
+                    Name: $('#qaName').val(),
+                    Phone: $('#qaPhone').val(),
+                    LicensePlate: $('#qaPlate').val(),
+                    MotorcycleBrand: $('#qaBrand').val(),
+                    MotorcycleModel: $('#qaModel').val()
+                };
+
+                // Basic validation
+                if(!customerData.Name || !customerData.LicensePlate || !customerData.MotorcycleBrand || !customerData.MotorcycleModel) {
+                    $('#qaAlert').removeClass('d-none').text('ກະລຸນາກອກຂໍ້ມູນທີ່ມີດອກຈັນ (*) ໃຫ້ຄົບຖ້ວນ');
+                    return;
+                }
+
+                $.ajax({
+                    url: '/RepairOrder/QuickAddCustomer',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(customerData),
+                    success: function (res) {
+                        if (res.success) {
+                            // Add new option to select
+                            var newOption = new Option(
+                                res.customerName + ' (' + res.licensePlate + ') - ' + res.brand + ' ' + res.model, 
+                                res.customerId, 
+                                true, 
+                                true
+                            );
+                            $(newOption).attr('data-plate', res.licensePlate);
+                            $('#customerSelect').append(newOption).trigger('change');
+                            
+                            // Close modal and reset
+                            $('#quickAddCustomerModal').modal('hide');
+                            $('#quickAddForm')[0].reset();
+                            $('#qaAlert').addClass('d-none');
+                        } else {
+                            $('#qaAlert').removeClass('d-none').text(res.message);
+                        }
+                    },
+                    error: function() {
+                        $('#qaAlert').removeClass('d-none').text('ເກີດຂໍ້ຜິດພາດໃນການເຊື່ອມຕໍ່ເຊີບເວີ');
+                    }
+                });
+            });
+        });
+    </script>
+}

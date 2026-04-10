@@ -1,0 +1,394 @@
+@model MotorcycleRepairShop.Models.ReportViewModel
+@{
+    ViewData["Title"] = "ລາຍງານຍອດຂາຍ / ລາຍຮັບ";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="bi bi-graph-up-arrow text-success"></i> ສະຫຼຸບຍອດຂາຍ ແລະ ລາຍຮັບ</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a asp-action="MechanicPayouts" class="btn btn-sm btn-outline-primary me-2 shadow-sm">
+            <i class="bi bi-person-lines-fill"></i> ລາຍງານຄ່າແຮງຊ່າງ
+        </a>
+        <a asp-action="ExportToExcel" asp-route-startDate="@Model.StartDate.ToString("yyyy-MM-dd")" asp-route-endDate="@Model.EndDate.ToString("yyyy-MM-dd")" class="btn btn-sm btn-outline-success shadow-sm">
+            <i class="bi bi-file-earmark-excel"></i> ສົ່ງອອກ Excel
+        </a>
+    </div>
+</div>
+
+<!-- ตัวกรองช่วงเวลา -->
+<div class="card shadow-sm border-0 mb-4 overflow-hidden">
+    <div class="card-body bg-light">
+        <form asp-action="Index" method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-bold">ຕັ້ງແຕ່ວັນທີ</label>
+                <input type="date" name="startDate" class="form-control" value="@Model.StartDate.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">ຮອດວັນທີ</label>
+                <input type="date" name="endDate" class="form-control" value="@Model.EndDate.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-6">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-filter"></i> ດຶງຂໍ້ມູນ
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ສຮຸບຕົວເລກ (Summary Dashboard) -->
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3 mb-4">
+    <div class="col">
+        <div class="card bg-success text-white border-0 shadow-sm h-100">
+            <div class="card-body py-4">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 bg-white bg-opacity-25 rounded-circle p-3">
+                        <i class="bi bi-cash-stack fs-1"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="text-white text-opacity-75 small text-uppercase">ລາຍຮັບລວມ</div>
+                        <div class="h3 mb-0 fw-bold">@Model.TotalRevenue.ToString("N0") ₭</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col">
+        <div class="card text-white border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+            <div class="card-body py-4">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 bg-white bg-opacity-25 rounded-circle p-3">
+                        <i class="bi bi-graph-up fs-1"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="text-white text-opacity-75 small text-uppercase">ກຳໄລຂັ້ນຕົ້ນ</div>
+                        <div class="h3 mb-0 fw-bold">@Model.TotalProfit.ToString("N0") ₭</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col">
+        <div class="card bg-danger text-white border-0 shadow-sm h-100">
+            <div class="card-body py-4">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 bg-white bg-opacity-25 rounded-circle p-3">
+                        <i class="bi bi-receipt-cutoff fs-1"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="text-white text-opacity-75 small text-uppercase">ລາຍຈ່າຍທັງໝົດ</div>
+                        <div class="h3 mb-0 fw-bold">@Model.TotalExpenses.ToString("N0") ₭</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="card bg-info text-dark border-0 shadow-sm h-100">
+            <div class="card-body py-4">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 bg-dark bg-opacity-10 rounded-circle p-3">
+                        <i class="bi bi-bank fs-1"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="text-dark text-opacity-75 small text-uppercase">ກຳໄລສຸດທິ</div>
+                        <div class="h3 mb-0 fw-bold">@Model.NetProfit.ToString("N0") ₭</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                <h5 class="m-0 fw-bold text-dark"><i class="bi bi-graph-up text-primary"></i> ແນວໂນ້ມລາຍຮັບ ແລະ ກຳໄລ</h5>
+                <div class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill">7-30 ວັນຫຼ້າສຸດ</div>
+            </div>
+            <div class="card-body">
+                <div style="height: 300px;">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3 border-0">
+                <h5 class="m-0 fw-bold text-dark"><i class="bi bi-pie-chart text-info"></i> ສັດສ່ວນລາຍຮັບ</h5>
+            </div>
+            <div class="card-body d-flex flex-column justify-content-center">
+                <div style="height: 250px;">
+                    <canvas id="distributionChart"></canvas>
+                </div>
+                <div class="mt-4">
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span><i class="bi bi-circle-fill text-primary me-2"></i> ຄ່າແຮງຊ່າງ</span>
+                        <span class="fw-bold">@Model.TotalLabor.ToString("N0") ₭</span>
+                    </div>
+                    <div class="d-flex justify-content-between small">
+                        <span><i class="bi bi-circle-fill text-info me-2"></i> ຄ່າອາໄຫຼ່</span>
+                        <span class="fw-bold">@Model.TotalPartsSale.ToString("N0") ₭</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Top Selling Parts -->
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3 border-0">
+                <h5 class="m-0 fw-bold text-dark"><i class="bi bi-star-fill text-warning"></i> 5 ອັນດັບອາໄຫຼ່ທີ່ຂາຍດີ</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">ຊື່ອາໄຫຼ່</th>
+                                <th class="text-center">ຈຳນວນ</th>
+                                <th class="text-end pe-4">ຍອດຂາຍລວມ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.TopSellingParts.Any())
+                            {
+                                foreach (var part in Model.TopSellingParts)
+                                {
+                                    <tr>
+                                        <td class="ps-4 fw-bold text-dark">@part.Name</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-primary text-white rounded-pill px-3">@part.Quantity</span>
+                                        </td>
+                                        <td class="text-end pe-4 fw-bold text-primary">@part.Revenue.ToString("N0") ₭</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="3" class="text-center py-5 text-muted italic">ຍັງບໍ່ມີຂໍ້ມູນການຂາຍໃນຊ່ວງເວລານີ້</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profit Margin Analysis -->
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3 border-0">
+                <h5 class="m-0 fw-bold text-dark"><i class="bi bi-pie-chart-fill text-info"></i> ວິເຄາະກຳໄລ</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4 py-3">
+                    <div class="display-3 fw-bold text-success">@Model.ProfitMargin.ToString("N1")%</div>
+                    <div class="text-muted text-uppercase small tracking-wider">ອັດຕາກຳໄລ (Profit Margin)</div>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">ຕົ້ນທຶນ (%)</span>
+                        <span class="fw-bold text-danger">@((100 - Model.ProfitMargin).ToString("N1"))%</span>
+                    </div>
+                    <div class="progress" style="height: 12px;">
+                        <div class="progress-bar bg-danger" role="progressbar" style="width: @(100 - Model.ProfitMargin)%"></div>
+                        <div class="progress-bar bg-success" role="progressbar" style="width: @Model.ProfitMargin%"></div>
+                    </div>
+                    <div class="d-flex justify-content-center mt-3 gap-4 small">
+                        <span><i class="bi bi-circle-fill text-danger me-1"></i> Cost</span>
+                        <span><i class="bi bi-circle-fill text-success me-1"></i> Profit</span>
+                    </div>
+                </div>
+
+                <div class="bg-light rounded p-3 mt-auto">
+                    <div class="row text-center g-2">
+                        <div class="col-6 border-end">
+                            <div class="small text-muted">ຂາຍໄດ້</div>
+                            <div class="fw-bold">@Model.TotalOrders</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="small text-muted">ລາຍຈ່າຍ</div>
+                            <div class="fw-bold text-danger">@Model.Expenses.Count</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+        <h5 class="m-0 fw-bold text-dark"><i class="bi bi-journal-text"></i> ລາຍການທັງໝົດ</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">ວັນທີ</th>
+                        <th>ເລກທີບິນ</th>
+                        <th>ລູກຄ້າ</th>
+                        <th class="text-end">ຍອດລວມ</th>
+                        <th class="text-end">ກຳໄລ</th>
+                        <th class="text-center pe-4">ປະເພດ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model.Orders)
+                    {
+                        <tr>
+                            <td class="ps-4">@order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="fw-bold">@order.OrderNumber</td>
+                            <td>@order.Customer?.Name</td>
+                            <td class="text-end fw-bold">@order.TotalAmount.ToString("N0") ₭</td>
+                            <td class="text-end text-success fw-bold">@((order.TotalAmount - order.TotalCost).ToString("N0")) ₭</td>
+                            <td class="text-center pe-4">
+                                <span class="badge @(order.IsPOS ? "bg-info-subtle text-info" : "bg-primary-subtle text-primary") px-2">
+                                    @(order.IsPOS ? "POS" : "Repair")
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const startDate = "@Model.StartDate.ToString("yyyy-MM-dd")";
+            const endDate = "@Model.EndDate.ToString("yyyy-MM-dd")";
+
+            fetch(`/Report/GetChartData?startDate=${startDate}&endDate=${endDate}`)
+                .then(response => response.json())
+                .then(data => {
+                    renderTrendChart(data);
+                });
+
+            renderDistributionChart(@Model.TotalLabor, @Model.TotalPartsSale);
+        });
+
+        function renderTrendChart(data) {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            
+            // Create Gradient
+            const gradientRevenue = ctx.createLinearGradient(0, 0, 0, 400);
+            gradientRevenue.addColorStop(0, 'rgba(99, 102, 241, 0.2)');
+            gradientRevenue.addColorStop(1, 'rgba(99, 102, 241, 0)');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [
+                        {
+                            label: 'ລາຍຮັບ (Revenue)',
+                            data: data.revenue,
+                            borderColor: '#6366f1',
+                            backgroundColor: gradientRevenue,
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#fff',
+                            pointBorderColor: '#6366f1',
+                            pointBorderWidth: 2
+                        },
+                        {
+                            label: 'ກຳໄລ (Profit)',
+                            data: data.profit,
+                            borderColor: '#10b981',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.4,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                boxWidth: 6,
+                                font: { family: 'Prompt', size: 12 }
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleFont: { family: 'Prompt' },
+                            bodyFont: { family: 'Prompt' },
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y.toLocaleString() + ' ₭';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 10 } }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#f1f5f9' },
+                            ticks: {
+                                callback: value => value >= 1000000 ? (value/1000000).toFixed(1) + 'M' : value.toLocaleString(),
+                                font: { size: 10 }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderDistributionChart(labor, parts) {
+            const ctx = document.getElementById('distributionChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['ຄ່າແຮງຊ່າງ', 'ຄ່າອາໄຫຼ່'],
+                    datasets: [{
+                        data: [labor, parts],
+                        backgroundColor: ['#6366f1', '#06b6d4'],
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+    </script>
+}

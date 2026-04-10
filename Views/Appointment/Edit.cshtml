@@ -1,0 +1,57 @@
+@model MotorcycleRepairShop.Models.Appointment
+@{
+    ViewData["Title"] = "ແກ້ໄຂຄິວນັດໝາຍ";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="bi bi-pencil-square"></i> ແກ້ໄຂການຈອງຄິວ</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> ກັບໄປຕາຕະລາງນັດ
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card shadow-sm border-warning">
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="CreatedAt" />
+                    <input type="hidden" asp-for="Status" />
+                    
+                    <div class="mb-3">
+                        <label asp-for="CustomerId" class="form-label fw-bold">ລູກຄ້າ</label>
+                        <select asp-for="CustomerId" class="form-select bg-light" asp-items="ViewBag.Customers" style="pointer-events: none;" readonly>
+                        </select>
+                        <small class="text-muted">ບໍ່ສາມາດປ່ຽນລູກຄ້າຂອງບິນນັດໝາຍນີ້ໄດ້</small>
+                    </div>
+
+                    <div class="mb-3 border rounded p-3 bg-light">
+                        <label asp-for="AppointmentDate" class="form-label fw-bold text-danger"><i class="bi bi-clock"></i> ເລື່ອນວັນ/ເວລາ ນັດໝາຍ <span class="text-danger">*</span></label>
+                        <input asp-for="AppointmentDate" class="form-control" type="datetime-local" required />
+                        <span asp-validation-for="AppointmentDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Reason" class="form-label fw-bold">ແຈ້ງອາການຫຼືສິ່ງທີ່ນັດຊ້ອມ</label>
+                        <textarea asp-for="Reason" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Reason" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-warning fw-bold">
+                            <i class="bi bi-save"></i> ບັນທຶກການປ່ຽນແປງ
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

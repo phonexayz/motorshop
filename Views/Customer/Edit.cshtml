@@ -1,0 +1,98 @@
+@model MotorcycleRepairShop.Models.Customer
+@{
+    ViewData["Title"] = "ແກ້ໄຂຂໍ້ມູນລູກຄ້າ";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="bi bi-pencil-square"></i> ແກ້ໄຂຂໍ້ມູນລູກຄ້າ</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a asp-action="Index" class="btn btn-secondary me-2">
+            <i class="bi bi-arrow-left"></i> ກັບ
+        </a>
+        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-info text-white">
+            <i class="bi bi-eye"></i> ເບິ່ງປະຫວັດ
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <form asp-action="Edit" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="CreatedAt" />
+            
+            <div class="row">
+                <!-- ข้อมูลลูกค้า -->
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm h-100 border-warning">
+                        <div class="card-header bg-warning text-dark fw-bold">
+                            <i class="bi bi-person"></i> ຂໍ້ມູນຕິດຕໍ່
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label asp-for="Name" class="form-label fw-bold">ຊື່-ນາມສະກຸນ <span class="text-danger">*</span></label>
+                                <input asp-for="Name" class="form-control" required />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="Phone" class="form-label fw-bold">ເບີໂທລະສັບ</label>
+                                <input asp-for="Phone" class="form-control" />
+                                <span asp-validation-for="Phone" class="text-danger"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="Address" class="form-label fw-bold">ທີ່ຢູ່</label>
+                                <textarea asp-for="Address" class="form-control" rows="3"></textarea>
+                                <span asp-validation-for="Address" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ข้อมูลรถ -->
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm h-100 border-warning">
+                        <div class="card-header bg-warning text-dark fw-bold">
+                            <i class="bi bi-bicycle"></i> ຂໍ້ມູນລົດຈັກ
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label asp-for="LicensePlate" class="form-label fw-bold">ປ້າຍທະບຽນລົດ <span class="text-danger">*</span></label>
+                                <input asp-for="LicensePlate" class="form-control text-uppercase" required />
+                                <span asp-validation-for="LicensePlate" class="text-danger"></span>
+                            </div>
+                            <div class="row">
+                                <div class="col-6 mb-3">
+                                    <label asp-for="MotorcycleBrand" class="form-label fw-bold">ຍີ່ຫໍ້ລົດ <span class="text-danger">*</span></label>
+                                    <input asp-for="MotorcycleBrand" class="form-control" required />
+                                    <span asp-validation-for="MotorcycleBrand" class="text-danger"></span>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label asp-for="MotorcycleModel" class="form-label fw-bold">ລຸ້ນລົດ <span class="text-danger">*</span></label>
+                                    <input asp-for="MotorcycleModel" class="form-control" required />
+                                    <span asp-validation-for="MotorcycleModel" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="Year" class="form-label fw-bold">ປີທີ່ຜະລິດລົດ (ປີ ຄ.ສ.)</label>
+                                <input asp-for="Year" type="number" min="1990" max="@DateTime.Now.Year" class="form-control" />
+                                <span asp-validation-for="Year" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between mt-2">
+                <span class="text-muted small">ລົງທະບຽນເມື່ອ: @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                <button type="submit" class="btn btn-warning px-5 fw-bold">
+                    <i class="bi bi-save"></i> ບັນທຶກການປ່ຽນແປງ
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

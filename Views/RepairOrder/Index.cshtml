@@ -1,0 +1,121 @@
+@model IEnumerable<MotorcycleRepairShop.Models.RepairOrder>
+@{
+    ViewData["Title"] = "ລາຍການໃບສັ່ງສ້ອມ";
+    var statusFilter = ViewBag.Status as string ?? "";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="bi bi-clipboard-check"></i> ລາຍການໃບສັ່ງສ້ອມທັງໝົດ</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a asp-action="History" class="btn btn-outline-primary me-2">
+            <i class="bi bi-clock-history"></i> ກວດສອບປະຫວັດລົດ
+        </a>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> ເປີດໃບສັ່ງສ້ອມໃໝ່
+        </a>
+    </div>
+</div>
+
+<div class="card mb-4 shadow-sm border-0 px-3 py-2">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="d-flex gap-2 align-items-center">
+            <span class="fw-bold">ຕົວຕອງສະຖານະ:</span>
+            <a asp-action="Index" asp-route-status="" asp-route-searchString="@ViewBag.SearchString" class="btn btn-sm @(string.IsNullOrEmpty(statusFilter) ? "btn-dark" : "btn-outline-dark")">ທັງໝົດ</a>
+            <a asp-action="Index" asp-route-status="Pending" asp-route-searchString="@ViewBag.SearchString" class="btn btn-sm @(statusFilter == "Pending" ? "btn-warning" : "btn-outline-warning")">ລໍຖ້າສ້ອມ</a>
+            <a asp-action="Index" asp-route-status="InProgress" asp-route-searchString="@ViewBag.SearchString" class="btn btn-sm @(statusFilter == "InProgress" ? "btn-info" : "btn-outline-info")">ກຳລັງສ້ອມ</a>
+            <a asp-action="Index" asp-route-status="Completed" asp-route-searchString="@ViewBag.SearchString" class="btn btn-sm @(statusFilter == "Completed" ? "btn-success" : "btn-outline-success")">ສຳເລັດແລ້ວ</a>
+        </div>
+        <div>
+            <form method="get" asp-action="Index" class="d-flex" style="min-width: 300px;">
+                @if (!string.IsNullOrEmpty(statusFilter))
+                {
+                    <input type="hidden" name="status" value="@statusFilter" />
+                }
+                <div class="input-group input-group-sm">
+                    <input type="text" name="searchString" value="@ViewBag.SearchString" class="form-control" placeholder="ຄົ້ນຫາເລກທີ, ຊື່ລູກຄ້າ, ທະບຽນ..." />
+                    <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
+                    @if (!string.IsNullOrEmpty((string)ViewBag.SearchString))
+                    {
+                        <a asp-action="Index" asp-route-status="@statusFilter" class="btn btn-outline-danger" title="ລຶບການຄົ້ນຫາ"><i class="bi bi-x-lg"></i></a>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">ເລກທີອໍເດີ້</th>
+                        <th>ວັນທີຮັບລົດ</th>
+                        <th>ລູກຄ້າ</th>
+                        <th>ທະບຽນ</th>
+                        <th>ອາການ</th>
+                        <th class="text-center">ສະຖານະ</th>
+                        <th class="text-end pe-4">ຈັດການ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        foreach (var order in Model.OrderByDescending(o => o.CreatedAt))
+                        {
+                            <tr>
+                                <td class="ps-4 fw-bold text-primary">@order.OrderNumber</td>
+                                <td>@order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@(order.Customer?.Name ?? "ลูกค้าทั่วไป")</td>
+                                <td><span class="badge bg-secondary">@order.MotorcycleLicensePlate</span></td>
+                                <td class="text-truncate" style="max-width: 200px;">@order.ProblemDescription</td>
+                                <td class="text-center">
+                                    @if(order.Status == "Pending") {
+                                        <span class="badge bg-warning text-dark"><i class="bi bi-clock"></i> ລໍຖ້າສ້ອມ</span>
+                                    }
+                                    else if(order.Status == "InProgress") {
+                                        <span class="badge bg-info text-dark"><i class="bi bi-tools"></i> ກຳລັງສ້ອມ</span>
+                                    }
+                                    else if(order.Status == "Completed") {
+                                        <span class="badge bg-success"><i class="bi bi-check-circle"></i> ສຳເລັດແລ້ວ</span>
+                                    }
+                                    else {
+                                        <span class="badge bg-secondary">@order.Status</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-outline-primary" title="ເບິ່ງລາຍລະອຽດ ແລະ ຈັດການ">
+                                            <i class="bi bi-eye"></i> ຈັດການ
+                                        </a>
+                                        <a asp-action="History" asp-route-plateNumber="@order.MotorcycleLicensePlate" class="btn btn-outline-info" title="ເບິ່ງປະຫວັດລົດຄັນນີ້">
+                                            <i class="bi bi-clock-history"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@order.Id" class="btn btn-outline-secondary" title="ແກ້ໄຂຂໍ້ມູນເບື້ອງຕົ້ນ">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <form asp-action="Delete" asp-route-id="@order.Id" method="post" class="d-inline" onsubmit="return confirm('ທ່ານຕ້ອງການລຶບໃບສັ່ງສ້ອມອັນນີ້ແທ້ບໍ່?');">
+                                            <button type="submit" class="btn btn-outline-danger" title="ລຶບໃບສັ່ງສ້ອມ">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fa-3x mb-3 d-block" style="font-size: 2.5rem;"></i>
+                                ບໍ່ມີຂໍ້ມູນໃບສັ່ງສ້ອມ
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

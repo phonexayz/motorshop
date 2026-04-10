@@ -1,0 +1,305 @@
+@{
+    ViewData["Title"] = "ສະແກນບາໂຄ້ດ";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">ສະແກນບາໂຄ້ດອາໄຫລ່</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> ກັບໄປໜ້າສະຕັອກ
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-camera"></i> ສະແກນດ້ວຍກ້ອງ</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <video id="video" class="w-100" style="max-height: 300px;"></video>
+                    <canvas id="canvas" style="display: none;"></canvas>
+                </div>
+                <div class="d-grid gap-2">
+                    <button id="startScan" class="btn btn-primary">
+                        <i class="bi bi-play-circle"></i> ເລີ່ມສະແກນ
+                    </button>
+                    <button id="stopScan" class="btn btn-danger" style="display: none;">
+                        <i class="bi bi-stop-circle"></i> ຢຸດສະແກນ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-upc-scan"></i> ຍິງບາໂຄ້ດ ຫຼື ປ້ອນດ້ວຍມື</h5>
+            </div>
+            <div class="card-body">
+                <form id="manualScanForm">
+                    <div class="mb-3">
+                        <label for="barcodeInput" class="form-label">ບາໂຄ້ດອາໄຫຼ່</label>
+                        <input type="text" class="form-control form-control-lg" id="barcodeInput" placeholder="ຄລິກທີ່ນີ້ແລ້ວຍິງບາໂຄ້ດໄດ້ເລີຍ..." autofocus>
+                        <div class="form-text text-success"><i class="bi bi-info-circle"></i> ສາມາດໃຊ້ປືນຍິງບາໂຄ້ດ ຍິງໃສ່ຊ່ອງນີ້ໄດ້ເລີຍຊ່ອງຈະຄົ້ນຫາອັດຕະໂນມັດ.</div>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-search"></i> ຄົ້ນຫາ
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Scan Result -->
+        <div class="card shadow mt-3" id="resultCard" style="display: none;">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-check-circle"></i> ຜົນການຄົ້ນຫາ</h5>
+            </div>
+            <div class="card-body" id="resultContent">
+                <!-- Results will be displayed here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/@@zxing/library@latest/umd/index.min.js"></script>
+    <script>
+        let codeReader = null;
+        let stream = null;
+        let isScanning = false;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeScanner();
+            
+            // Manual scan form
+            document.getElementById('manualScanForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const barcode = document.getElementById('barcodeInput').value.trim();
+                if (barcode) {
+                    searchByBarcode(barcode);
+                }
+            });
+        });
+
+        function initializeScanner() {
+            codeReader = new ZXing.BrowserMultiFormatReader();
+        }
+
+        document.getElementById('startScan').addEventListener('click', function() {
+            startScanning();
+        });
+
+        document.getElementById('stopScan').addEventListener('click', function() {
+            stopScanning();
+        });
+
+        async function startScanning() {
+            try {
+                // Request camera permission
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "environment" } 
+                });
+                
+                const videoElement = document.getElementById('video');
+                videoElement.srcObject = stream;
+                videoElement.setAttribute('playsinline', true);
+                videoElement.play();
+                
+                // Wait for video to be ready
+                await new Promise((resolve) => {
+                    videoElement.onloadedmetadata = () => resolve();
+                });
+                
+                isScanning = true;
+                document.getElementById('startScan').style.display = 'none';
+                document.getElementById('stopScan').style.display = 'block';
+                
+                // Start continuous scanning
+                scanContinuously();
+                
+            } catch (err) {
+                console.error('Error accessing camera:', err);
+                alert('ບໍ່ສາມາດເຂົ້າເຖິງກ້ອງໄດ້: ' + err.message);
+            }
+        }
+
+        function stopScanning() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            
+            isScanning = false;
+            document.getElementById('startScan').style.display = 'block';
+            document.getElementById('stopScan').style.display = 'none';
+            
+            const videoElement = document.getElementById('video');
+            videoElement.srcObject = null;
+        }
+
+        function scanContinuously() {
+            if (!isScanning) return;
+            
+            const videoElement = document.getElementById('video');
+            
+            codeReader.decodeOnceFromVideoDevice(null, videoElement)
+                .then((result) => {
+                    if (result && result.text) {
+                        searchByBarcode(result.text);
+                        stopScanning();
+                    }
+                })
+                .catch((err) => {
+                    // Continue scanning
+                    if (isScanning) {
+                        setTimeout(() => scanContinuously(), 100);
+                    }
+                });
+        }
+
+        async function searchByBarcode(barcode) {
+            try {
+                const response = await fetch('/Inventory/ScanBarcode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `barcode=${encodeURIComponent(barcode)}`
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayScanResult(data.part, barcode);
+                } else {
+                    displayScanError(data.message, barcode);
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                displayScanError('ເກີດຂໍ້ຜິດພາດໃນການຄົ້ນຫາ', barcode);
+            }
+        }
+
+        function displayResultLao(data, barcodeContent) {
+            // Replaced logic goes here, translated labels to Lao
+            const resultContent = document.getElementById('resultContent');
+            resultContent.innerHTML = `
+                <div class="row">
+                    <div class="col-sm-4">
+                        <strong>ບາໂຄ້ດ:</strong><br>
+                        <code>${barcodeContent}</code>
+                    </div>
+                    <div class="col-sm-8">
+                        <strong>ຊື່ອາໄຫຼ່:</strong><br>
+                        ${data.name}
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <strong>ລະຫັດອາໄຫຼ່:</strong><br>
+                        ${data.partNumber || '-'}
+                    </div>
+                    <div class="col-sm-6">
+                        <strong>ລາຄາ:</strong><br>
+                        <span class="text-success fw-bold">${data.price.toFixed(2)} ກີບ</span>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <strong>ສະຕັອກຄົງເຫຼືອ:</strong><br>
+                        <span class="badge bg-${data.stockQuantity <= data.minStockLevel ? 'danger' : 'success'}">
+                            ${data.stockQuantity} ${data.unit}
+                        </span>
+                    </div>
+                    <div class="col-sm-6">
+                        <strong>ລຸ້ນທີ່ຮອງຮັບ:</strong><br>
+                        <small>${data.compatibleModels ? data.compatibleModels.join(', ') : '-'}</small>
+                    </div>
+                </div>
+                <hr>
+                <div class="d-grid gap-2">
+                    <a href="/Inventory/Details/${data.id}" class="btn btn-info">
+                        <i class="bi bi-eye"></i> ເບິ່ງລາຍລະອຽດ
+                    </a>
+                    <button class="btn btn-warning" onclick="updateStockFromScan(${data.id})">
+                        <i class="bi bi-pencil"></i> ອັບເດດສະຕັອກ
+                    </button>
+                </div>
+            `;
+            const resultCard = document.getElementById('resultCard');
+            resultCard.style.display = 'block';
+            resultCard.className = 'card shadow mt-3';
+            
+            // Re-focus the input and clear it so scanner can scan next item quickly
+            document.getElementById('barcodeInput').value = '';
+            document.getElementById('barcodeInput').focus();
+        }
+
+        function displayScanResult(part, scannedBarcode) {
+            displayResultLao(part, scannedBarcode);
+        }
+
+        function displayScanError(message, scannedBarcode) {
+            const resultCard = document.getElementById('resultCard');
+            const resultContent = document.getElementById('resultContent');
+            
+            resultCard.className = 'card shadow mt-3 border-danger';
+            resultContent.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle"></i> ບໍ່ພົບອາໄຫຼ່ທີ່ກົງກັບບາໂຄ້ດນີ້
+                </div>
+                <p><strong>ບາໂຄ້ດທີ່ສະແກນ:</strong> <code>${scannedBarcode}</code></p>
+                <div class="d-grid">
+                    <button class="btn btn-outline-primary" onclick="addNewPart('${scannedBarcode}')">
+                        <i class="bi bi-plus-circle"></i> ເພີ່ມອາໄຫຼ່ໃໝ່ (ດ້ວຍບາໂຄ້ດນີ້)
+                    </button>
+                </div>
+            `;
+            
+            resultCard.style.display = 'block';
+            
+            // Re-focus 
+            document.getElementById('barcodeInput').value = '';
+            document.getElementById('barcodeInput').focus();
+        }
+
+        function updateStockFromScan(partId) {
+            const quantity = prompt('ກະລຸນາລະບຸຈຳນວນທີ່ຕ້ອງການເພີ່ມສະຕັອກ:', '1');
+            if (quantity && !isNaN(quantity)) {
+                fetch('/Inventory/UpdateStock', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `id=${partId}&quantity=${quantity}&operation=add`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('ອັບເດດສະຕັອກສຳເລັດແລ້ວ');
+                        location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('ເກີດຂໍ້ຜິດພາດໃນການອັບເດດສະຕັອກ');
+                });
+            }
+        }
+
+        function addNewPart(barcode) {
+            window.location.href = `/Inventory/Create?barcode=${encodeURIComponent(barcode)}`;
+        }
+    </script>
+}

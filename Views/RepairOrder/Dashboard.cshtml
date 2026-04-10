@@ -1,0 +1,289 @@
+@model MotorcycleRepairShop.Controllers.RepairDashboardViewModel
+@{
+    ViewData["Title"] = "ແດັສບອດຊ່າງສ້ອມ";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">ແດັສບອດຊ່າງສ້ອມ</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> ເປີດໃບສັ່ງສ້ອມໃໝ່
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-warning">ລໍຖ້າດຳເນີນການ</h5>
+                <h2 class="text-warning">@Model.PendingOrders.Count</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-info">ກຳລັງສ້ອມ</h5>
+                <h2 class="text-info">@Model.InProgressOrders.Count</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title text-success">ສ້ອມມື້ນີ້</h5>
+                <h2 class="text-success">@Model.TodayOrders.Count</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- In Progress Orders -->
+<div class="card shadow mb-4">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0"><i class="bi bi-tools"></i> ວຽກທີ່ກຳລັງດຳເນີນການ</h5>
+    </div>
+    <div class="card-body">
+        @if (Model.InProgressOrders.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ເລກທີ</th>
+                            <th>ລູກຄ້າ</th>
+                            <th>ທະບຽນລົດ</th>
+                            <th>ອາການແຈ້ງສ້ອມ</th>
+                            <th>ເວລາເຂົ້າ</th>
+                            <th class="text-center">ດຳເນີນການ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model.InProgressOrders)
+                        {
+                            <tr class="status-inprogress">
+                                <td><strong>@order.OrderNumber</strong></td>
+                                <td>@order.Customer?.Name</td>
+                                <td>@order.MotorcycleLicensePlate</td>
+                                <td>
+                                    <small>@order.ProblemDescription</small>
+                                    @if (!string.IsNullOrEmpty(order.MechanicNotes))
+                                    {
+                                        <br><small class="text-muted"><i>หมายเหตุ: @order.MechanicNotes</i></small>
+                                    }
+                                </td>
+                                <td><small>@order.CreatedAt.ToString("dd/MM HH:mm")</small></td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-success" onclick="completeRepair(@order.Id)" title="ສຳເລັດ">
+                                            <i class="bi bi-check-circle"></i>
+                                        </button>
+                                        @if (!string.IsNullOrEmpty(order.Customer?.Phone))
+                                        {
+                                            <a href="https://wa.me/@(order.Customer.Phone.StartsWith("0") ? "856" + order.Customer.Phone.Substring(1) : (order.Customer.Phone.StartsWith("20") || order.Customer.Phone.StartsWith("30") ? "856" + order.Customer.Phone : order.Customer.Phone))" 
+                                               target="_blank" class="btn btn-outline-success" title="WhatsApp">
+                                                <i class="bi bi-whatsapp"></i>
+                                            </a>
+                                        }
+                                        <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-info" title="ເບິ່ງລາຍລະອຽດ">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-4">
+                <i class="bi bi-tools fa-3x text-muted"></i>
+                <p class="text-muted mt-2"> ບໍ່ມີວຽກທີ່ກຳລັງດຳເນີນການ</p>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Pending Orders -->
+<div class="card shadow">
+    <div class="card-header bg-warning text-white">
+        <h5 class="mb-0"><i class="bi bi-clock"></i> ລໍດຳເນີນການ</h5>
+    </div>
+    <div class="card-body">
+        @if (Model.PendingOrders.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ເລກທີ</th>
+                            <th>ລູກຄ້າ</th>
+                            <th>ທະບຽນລົດ</th>
+                            <th>ອາການແຈ້ງສ້ອມ</th>
+                            <th>ເວລາເຂົ້າ</th>
+                            <th class="text-center">ດຳເນີນການ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model.PendingOrders)
+                        {
+                            <tr class="status-pending">
+                                <td><strong>@order.OrderNumber</strong></td>
+                                <td>@order.Customer?.Name</td>
+                                <td>@order.MotorcycleLicensePlate</td>
+                                <td><small>@order.ProblemDescription</small></td>
+                                <td><small>@order.CreatedAt.ToString("dd/MM HH:mm")</small></td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="startRepair(@order.Id)">
+                                        <i class="bi bi-play-circle"></i> ເລີ່ມສ້ອມ
+                                    </button>
+                                    <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-info btn-sm">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-4">
+                <i class="bi bi-clock fa-3x text-muted"></i>
+                <p class="text-muted mt-2">ບໍ່ມີວຽກທີ່ລໍດຳເນີນການ</p>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Complete Repair Modal -->
+<div class="modal fade" id="completeRepairModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">ສ້ອມສຳເລັດແລ້ວ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="completeRepairForm">
+                    <input type="hidden" id="orderId" name="orderId">
+                    <div class="mb-3">
+                        <label for="serviceType" class="form-label">ປະເພດການສ້ອມ (Service Type)</label>
+                        <select class="form-select" id="serviceType">
+                            <option value="">-- ເລືອກປະເພດວຽກ --</option>
+                        </select>
+                        <div class="form-text">ເລືອກປະເພດວຽກເພື່ອດຶງລາຄາອັດຕະໂນມັດ ຫຼື ພິມເອງດ້ານລຸ່ມ</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="laborCost" class="form-label">ຄ່າແຮງ</label>
+                        <input type="number" class="form-control" id="laborCost" name="laborCost" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">ໝາຍເຫດການສ້ອມ</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ຍົກເລີກ</button>
+                <button type="button" class="btn btn-success" onclick="submitCompleteRepair()">ຢືນຢັນສຳເລັດ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let completeRepairModal;
+        let servicesList = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            completeRepairModal = new bootstrap.Modal(document.getElementById('completeRepairModal'));
+            
+            // Pre-load services
+            fetch('/Service/GetServicesJson')
+                .then(response => response.json())
+                .then(data => {
+                    servicesList = data;
+                    const select = document.getElementById('serviceType');
+                    data.forEach(service => {
+                        const option = document.createElement('option');
+                        option.value = service.price;
+                        option.textContent = (service.category ? `[${service.category}] ` : '') + service.name + ` (${service.price.toLocaleString()} ₭)`;
+                        select.appendChild(option);
+                    });
+                });
+
+            // Listen for service selection change
+            document.getElementById('serviceType').addEventListener('change', function() {
+                if (this.value) {
+                    document.getElementById('laborCost').value = this.value;
+                }
+            });
+        });
+
+        function startRepair(orderId) {
+            fetch('/RepairOrder/UpdateStatus', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `id=${orderId}&status=InProgress`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('ເກີດຂໍ້ຜິດພາດ');
+            });
+        }
+
+        function completeRepair(orderId) {
+            document.getElementById('orderId').value = orderId;
+            document.getElementById('laborCost').value = '';
+            document.getElementById('notes').value = '';
+            completeRepairModal.show();
+        }
+
+        function submitCompleteRepair() {
+            const orderId = document.getElementById('orderId').value;
+            const laborCost = document.getElementById('laborCost').value;
+            const notes = document.getElementById('notes').value;
+
+            fetch('/RepairOrder/CompleteRepair', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `id=${orderId}&laborCost=${laborCost}&notes=${encodeURIComponent(notes)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`ສຳເລັດການສ້ອມ! ຍອດລວມ: ${data.totalAmount.toFixed(2)} ກີບ`);
+                    completeRepairModal.hide();
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('ເກີດຂໍ້ຜິດພາດ');
+            });
+        }
+    </script>
+}

@@ -1,0 +1,89 @@
+@{
+    ViewData["Title"] = "ຂໍ້ມູນສ່ວນຕົວ";
+}
+
+<div class="main-wrapper py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-6 col-lg-8">
+                
+                <div class="text-center mb-5 fade-in">
+                    <h2 class="display-6 fw-bold text-dark mb-2">ຂໍ້ມູນສ່ວນຕົວ</h2>
+                    <p class="text-secondary">ຈັດການຂໍ້ມູນ ແລະ ປ່ຽນລະຫัดຜ່ານເຂົ້າສູ່ລະບົບ</p>
+                </div>
+
+                <div class="row g-4">
+                    <!-- User Info Card -->
+                    <div class="col-md-5">
+                        <div class="card border-0 shadow-sm text-center p-4 h-100" style="border-radius: 20px; background: rgba(255,255,255,0.9);">
+                            <div class="avatar-wrapper mb-3">
+                                <i class="bi bi-person-circle display-1 text-primary"></i>
+                            </div>
+                            <h4 class="fw-bold mb-1">@ViewBag.Username</h4>
+                            <span class="badge bg-primary-soft text-primary px-3 py-2 rounded-pill mb-3">
+                                @(ViewBag.Role == "Admin" ? "ຜູ້ດູແລລະບົບ" : 
+                                  ViewBag.Role == "Owner" ? "ເຈົ້າຂອງຮ້ານ" :
+                                  ViewBag.Role == "Director" ? "ຜູ້ອຳນວຍການ" :
+                                  ViewBag.Role == "Manager" ? "ຜູ້ຈັດການ" :
+                                  ViewBag.Role == "Staff" ? "ພະນັກງານ" : "ຊ່າງສ້ອມ")
+                            </span>
+                            <div class="text-muted small">
+                                <p><i class="bi bi-shield-lock me-1"></i> ລະບົບປ້ອງກັນຂໍ້ມູນ SHA-256</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Change Password Card -->
+                    <div class="col-md-7">
+                        <div class="card border-0 shadow-lg overflow-hidden h-100" style="border-radius: 20px;">
+                            <div class="p-1 bg-primary"></div>
+                            <div class="card-body p-4">
+                                <h5 class="fw-bold mb-4"><i class="bi bi-key me-2 text-primary"></i>ປ່ຽนລະຫັດຜ່ານ</h5>
+                                
+                                <form asp-action="ChangePassword" method="post">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold small">ລະຫັດຜ່ານໃໝ່</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-0"><i class="bi bi-lock"></i></span>
+                                            <input type="password" name="newPassword" class="form-control bg-light border-0" placeholder="••••••••" required minlength="4">
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="form-label fw-semibold small">ຢືນຢັນລະຫັດຜ່ານໃໝ່</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-0"><i class="bi bi-check2-circle"></i></span>
+                                            <input type="password" name="confirmPassword" class="form-control bg-light border-0" placeholder="••••••••" required minlength="4">
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" style="border-radius: 12px;">
+                                        ອັບເດດລະຫັດຜ່ານ
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-5">
+                    <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted small">
+                        <i class="bi bi-arrow-left me-1"></i> ກັບຄືນສູ່ໜ້າແດຊບອດ
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-primary-soft { background-color: rgba(99, 102, 241, 0.1); }
+    .btn-primary { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); border: none; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4); }
+    .fade-in { animation: fadeInUp 0.5s ease-out; }
+    @@keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>

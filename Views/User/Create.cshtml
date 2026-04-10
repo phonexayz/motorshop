@@ -1,0 +1,272 @@
+@model MotorcycleRepairShop.Models.User
+@{
+    ViewData["Title"] = "ສ້າງບັນຊີຜູ້ໃຊ້ໃໝ່";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<div class="main-wrapper py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-5 col-lg-7 col-md-9">
+                
+                <div class="text-center mb-4 fade-in">
+                    <h2 class="display-6 fw-bold text-dark mb-2">ສ້າງບັນຊີໃໝ່</h2>
+                    <p class="text-secondary">ເພີ່ມສະມາຊິກໃໝ່ເຂົ້າສູ່ລະບົບຈັດການຮ້ານສ້ອມແປງ</p>
+                </div>
+
+                <div class="card main-card border-0 shadow-xl overflow-hidden">
+                    <div class="card-header-gradient"></div>
+                    
+                    <div class="card-body p-4 p-md-5">
+                        <form asp-action="Create" method="post" id="modernForm">
+                            <div asp-validation-summary="ModelOnly" class="alert alert-custom-danger small mb-4"></div>
+
+                            <div class="custom-form-group mb-4">
+                                <label asp-for="Username" class="custom-label">ຊື່ຜູ້ໃຊ້</label>
+                                <div class="input-with-icon">
+                                    <i class="bi bi-at icon-leading"></i>
+                                    <input asp-for="Username" class="custom-input" placeholder="ເຊັ່ນ: somchai_repair" autocomplete="off" required />
+                                </div>
+                                <span asp-validation-for="Username" class="text-danger-custom"></span>
+                            </div>
+
+                            <div class="custom-form-group mb-4">
+                                <label class="custom-label">ລະຫັດຜ່ານ</label>
+                                <div class="input-with-icon">
+                                    <i class="bi bi-shield-lock icon-leading"></i>
+                                    <input type="password" name="Password" id="passwordInput" class="custom-input" placeholder="••••••••" required />
+                                    <button type="button" class="btn-toggle-pass" onclick="togglePassword()">
+                                        <i class="bi bi-eye" id="toggleIcon"></i>
+                                    </button>
+                                </div>
+                                <div class="password-strength-meter mt-2">
+                                    <div class="meter-bar"></div>
+                                </div>
+                            </div>
+
+                            <div class="custom-form-group mb-5">
+                                <label class="custom-label mb-3">ລະດັບສິດທິການໃຊ້ງານ</label>
+                                <div class="role-grid">
+                                    <input type="radio" name="Role" value="Mechanic" id="role1" checked>
+                                    <label for="role1" class="role-item">
+                                        <i class="bi bi-tools"></i>
+                                        <span>ຊ່າງສ້ອມ</span>
+                                    </label>
+
+                                    <input type="radio" name="Role" value="Staff" id="role2">
+                                    <label for="role2" class="role-item">
+                                        <i class="bi bi-person-badge"></i>
+                                        <span>ພະນັກງານ</span>
+                                    </label>
+                                    
+                                    <input type="radio" name="Role" value="Manager" id="role4">
+                                    <label for="role4" class="role-item">
+                                        <i class="bi bi-briefcase"></i>
+                                        <span>ຜູ້ຈັດການ</span>
+                                    </label>
+
+                                    <input type="radio" name="Role" value="Director" id="role5">
+                                    <label for="role5" class="role-item">
+                                        <i class="bi bi-building"></i>
+                                        <span>ຜູ້ອຳນວຍການ</span>
+                                    </label>
+
+                                    <input type="radio" name="Role" value="Owner" id="role6">
+                                    <label for="role6" class="role-item">
+                                        <i class="bi bi-house-door"></i>
+                                        <span>ເຈົ້າຂອງຮ້ານ</span>
+                                    </label>
+
+                                    <input type="radio" name="Role" value="Admin" id="role3">
+                                    <label for="role3" class="role-item">
+                                        <i class="bi bi-shield-check"></i>
+                                        <span>ຜູ້ດູແລລະບົບ</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="d-flex flex-column gap-3">
+                                <button type="submit" class="btn-modern-primary">
+                                    <span>ສ້າງບັນຊີຜູ້ໃຊ້</span>
+                                    <i class="bi bi-arrow-right-short"></i>
+                                </button>
+                                <a asp-action="Index" class="btn-modern-ghost text-center text-decoration-none">
+                                    ຍົກເລີກ ແລະ ກັບຄືນ
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <p class="text-center text-muted mt-5 small">
+                    Secured by <strong>SHA-256 Encryption</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        --input-bg: #f8fafc;
+        --text-main: #1e293b;
+        --glass-bg: rgba(255, 255, 255, 0.95);
+    }
+
+    body {
+        font-family: 'Phetsarath OT', sans-serif;
+        background-color: #f1f5f9;
+        /* พื้นหลังแบบเคลื่อนไหวเบาๆ */
+        background-image: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.1) 0, transparent 50%), 
+                          radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.1) 0, transparent 50%);
+    }
+
+    /* Card Styling */
+    .main-card {
+        border-radius: 24px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header-gradient {
+        height: 6px;
+        background: var(--primary-gradient);
+    }
+
+    /* Custom Input Styling */
+    .custom-label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--text-main);
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .input-with-icon {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .icon-leading {
+        position: absolute;
+        left: 16px;
+        color: #94a3b8;
+        font-size: 1.2rem;
+    }
+
+    .custom-input {
+        width: 100%;
+        padding: 14px 16px 14px 48px;
+        background: var(--input-bg);
+        border: 2px solid transparent;
+        border-radius: 14px;
+        transition: all 0.3s ease;
+        outline: none;
+    }
+
+    .custom-input:focus {
+        background: #fff;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+
+    /* Role Grid UI (เปลี่ยน Select เป็น Card เล็กๆ) */
+    .role-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+
+    .role-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 15px;
+        background: var(--input-bg);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 2px solid transparent;
+    }
+
+    .role-item i { font-size: 1.5rem; margin-bottom: 5px; color: #64748b; }
+    .role-item span { font-size: 0.8rem; font-weight: 500; }
+
+    .role-grid input[type="radio"] { display: none; }
+    .role-grid input[type="radio"]:checked + .role-item {
+        background: #fff;
+        border-color: #6366f1;
+        color: #6366f1;
+    }
+    .role-grid input[type="radio"]:checked + .role-item i { color: #6366f1; }
+
+    /* Buttons */
+    .btn-modern-primary {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        padding: 16px;
+        border-radius: 14px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-modern-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.5);
+    }
+
+    .btn-modern-ghost {
+        color: #64748b;
+        font-weight: 500;
+        padding: 10px;
+        transition: color 0.2s;
+    }
+
+    .btn-modern-ghost:hover { color: var(--text-main); }
+
+    .btn-toggle-pass {
+        position: absolute;
+        right: 12px;
+        border: none;
+        background: none;
+        color: #94a3b8;
+    }
+
+    /* Animation */
+    .fade-in {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    @@keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<script>
+    function togglePassword() {
+        const passInput = document.getElementById('passwordInput');
+        const icon = document.getElementById('toggleIcon');
+        if (passInput.type === 'password') {
+            passInput.type = 'text';
+            icon.classList.replace('bi-eye', 'bi-eye-slash');
+        } else {
+            passInput.type = 'password';
+            icon.classList.replace('bi-eye-slash', 'bi-eye');
+        }
+    }
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
