@@ -103,10 +103,21 @@ using (var scope = app.Services.CreateScope())
         Console.WriteLine($"[Cloud] Migration failed: {ex.Message}");
     }
     
-    if (!context.Users.Any())
+    // Rescue Admin: Ensure 'admin' user always exists with the correct hash for 'password'
+    var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
+    var adminUser = await context.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == "admin");
+    if (adminUser == null)
     {
-        var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
-        authService.RegisterAsync("admin", "password", "Admin").GetAwaiter().GetResult();
+        Console.WriteLine("[Cloud] Seeding default admin user...");
+        await authService.RegisterAsync("admin", "password", "Admin");
+    }
+    else 
+    {
+        // Force update admin password to 'password' for rescue purposes (can be removed later)
+        Console.WriteLine("[Cloud] Rescuing admin password...");
+        adminUser.PasswordHash = authService.HashPassword("password");
+        context.Users.Update(adminUser);
+        await context.SaveChangesAsync();
     }
 }
 

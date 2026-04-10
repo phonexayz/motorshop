@@ -19,8 +19,9 @@ namespace MotorcycleRepairShop.Services
 
         public async Task<bool> LoginAsync(string username, string password)
         {
+            var normalizedUsername = username.ToLower();
             var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Username == username);
+                .FirstOrDefaultAsync(u => u.Username.ToLower() == normalizedUsername);
 
             if (user == null)
                 return false;
