@@ -32,21 +32,25 @@ if (!string.IsNullOrEmpty(databaseUrl))
 {
     try 
     {
-        // Try to parse postgres://user:pass@host:port/db
-        var uri = new Uri(databaseUrl);
-        var userInfo = uri.UserInfo.Split(':');
-        var user = userInfo[0];
-        var password = userInfo.Length > 1 ? userInfo[1] : "";
-        var host = uri.Host;
-        var port = uri.Port;
-        var database = uri.AbsolutePath.TrimStart('/');
+        // Replace postgresql:// with postgres:// for Uri class if needed
+        var formattedUrl = databaseUrl.Replace("postgresql://", "postgres://");
+        var uri = new Uri(formattedUrl);
         
-        connectionString = $"Host={host};Port={port};Username={user};Password={password};Database={database};SSL Mode=Require;Trust Server Certificate=True";
+        var userInfo = uri.UserInfo.Split(':');
+        var user = Uri.UnescapeDataString(userInfo[0]);
+        var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "";
+        var host = uri.Host;
+        var port = uri.Port > 0 ? uri.Port : 5432;
+        var database = Uri.UnescapeDataString(uri.AbsolutePath.TrimStart('/'));
+        
+        connectionString = $"Host={host};Port={port};Username={user};Password={password};Database={database};SSL Mode=Require;Trust Server Certificate=True;Pooling=true;";
+        
+        Console.WriteLine($"[Cloud] Attempting to connect to host: {host}, database: {database}");
     }
-    catch
+    catch (Exception ex)
     {
-        // If URI parsing fails, use the raw string (it might already be in Npgsql format or the provider might supply it that way)
-        if (!databaseUrl.StartsWith("postgres://"))
+        Console.WriteLine($"[Cloud] Error parsing DATABASE_URL: {ex.Message}");
+        if (!databaseUrl.StartsWith("postgres"))
         {
             connectionString = databaseUrl;
         }
@@ -55,6 +59,13 @@ if (!string.IsNullOrEmpty(databaseUrl))
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
+
+// Support dynamic PORT assigned by Railway
+var portEnv = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrEmpty(portEnv))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{portEnv}");
+}
 
 // Register services
 builder.Services.AddScoped<IInventoryService, InventoryService>();
@@ -70,7 +81,16 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    context.Database.Migrate();
+    try 
+    {
+        Console.WriteLine("[Cloud] Running database migrations...");
+        context.Database.Migrate();
+        Console.WriteLine("[Cloud] Database migration successful.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[Cloud] Migration failed: {ex.Message}");
+    }
     
     if (!context.Users.Any())
     {
