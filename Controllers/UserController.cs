@@ -141,8 +141,9 @@ namespace MotorcycleRepairShop.Controllers
         {
             using (var sha256 = SHA256.Create())
             {
-                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-                return BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
+                var saltedPassword = password + "MotorcycleShop2024";
+                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(saltedPassword));
+                return Convert.ToBase64String(hashedBytes);
             }
         }
     }
