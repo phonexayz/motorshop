@@ -10,5 +10,6 @@ namespace MotorcycleRepairShop.Services
         string? GetCurrentRole();
         int? GetCurrentUserId();
         Task<bool> UpdatePasswordAsync(int userId, string newPassword);
+        string HashPassword(string password);
     }
 }
